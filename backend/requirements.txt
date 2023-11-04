@@ -1,0 +1,13 @@
+attrs==22.2.0
+autopep8==1.5.7
+beautifulsoup4==4.12.2
+exceptiongroup==1.1.0
+iniconfig==2.0.0
+packaging==23.0
+pluggy==1.0.0
+psycopg==3.0.15
+pycodestyle==2.7.0
+pytest==7.2.1
+soupsieve==2.5
+toml==0.10.2
+tomli==2.0.1
