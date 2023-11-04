@@ -1,6 +1,15 @@
+"use client";
 import MainLayout from "@/layouts/MainLayout";
-import Image from "next/image";
 
 export default function Home() {
-  return <MainLayout>Track My Package</MainLayout>;
+  function fetchGmailData() {
+    // Make an API request to your Python server to fetch Gmail data here.
+  }
+  return (
+    <MainLayout>
+      Track My Package
+      <h1>Gmail App</h1>
+      <button onClick={() => fetchGmailData()}>Fetch Gmail Data</button>
+    </MainLayout>
+  );
 }
