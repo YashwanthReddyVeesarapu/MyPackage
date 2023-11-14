@@ -1,0 +1,22 @@
+button {
+  display: flex;
+  height: 100%;
+  background-color: black;
+  color: white;
+  font-size: 1em;
+  padding: 10px 20px;
+  border-radius: 1em;
+  border: none;
+  margin: 5px;
+  justify-content: center;
+
+  &:hover {
+    background-color: blue;
+    color: white;
+  }
+}
+
+.dark {
+  background-color: white;
+  color: black;
+}

@@ -1,10 +1,45 @@
+"use client";
+import Button from "@/components/Button";
+import Input from "@/components/Input";
 import MainLayout from "@/layouts/MainLayout";
-import React from "react";
+import React, { useState } from "react";
 
 type Props = {};
 
 const RegisterPage = (props: Props) => {
-  return <MainLayout>Register Page</MainLayout>;
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [cpassword, setCpassword] = useState("");
+
+  const handleRegistration = () => {};
+  return (
+    <>
+      <div>
+        <h1>Login</h1>
+        <div>
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={setEmail}
+          />
+          <Input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={setPassword}
+          />
+          <Input
+            type="password"
+            placeholder="Password"
+            value={cpassword}
+            onChange={setCpassword}
+          />
+          <Button onClick={() => handleRegistration()}>Register</Button>
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default RegisterPage;

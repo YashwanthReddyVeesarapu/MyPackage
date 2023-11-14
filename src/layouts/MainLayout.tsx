@@ -3,15 +3,22 @@ import Header from "@/components/Header";
 
 import React from "react";
 
-export default function MainLayout({
-  children,
-}: {
+import { UserAuth } from "@/app/context/AuthContext";
+
+type Props = {
   children: React.ReactNode;
-}) {
+  className?: string;
+};
+
+export default function MainLayout({ children, className }: Props) {
+  const auth = UserAuth();
+
+  console.log(auth);
+
   return (
     <>
       <Header />
-      <main>{children}</main>
+      <main className={className}>{children}</main>
       <Footer />
     </>
   );

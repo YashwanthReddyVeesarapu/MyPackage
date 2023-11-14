@@ -1,9 +1,15 @@
-import Image from "next/image";
+import Link from "next/link";
+import "./styles.scss";
 
 export default function Header() {
   return (
     <header>
-      <h1>MyPackage</h1>
+      <div>
+        <Link href={"/"}>MyPackage</Link>
+      </div>
+      <div>
+        <Link href={"/profile"}>Profile</Link>
+      </div>
     </header>
   );
 }
