@@ -3,7 +3,7 @@ import Button from "@/components/Button";
 import MainLayout from "@/layouts/MainLayout";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import React, { useEffect, useState } from "react";
-import { UserAuth } from "../context/AuthContext";
+import { UserAuth } from "../../components/context/AuthContext";
 import Container from "@/components/Container";
 import { redirect } from "next/navigation";
 
@@ -17,7 +17,7 @@ const ProfilePage = () => {
   };
 
   if (!user) {
-    redirect("login");
+    redirect("/login");
   }
   return (
     <>

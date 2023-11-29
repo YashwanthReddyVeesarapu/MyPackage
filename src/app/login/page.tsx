@@ -10,9 +10,11 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
 } from "firebase/auth";
-import { UserAuth } from "../context/AuthContext";
+import { UserAuth } from "../../components/context/AuthContext";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
+import axios from "axios";
 
 type Props = {};
 
@@ -25,27 +27,43 @@ const LoginPage = (props: Props) => {
 
   if (user) return redirect("/profile");
 
+  const fetchGmailData = async (accessToken: string, userId: string) => {
+    try {
+      // Specify the Gmail API endpoint for the user's messages
+      const apiUrl = `https://gmail.googleapis.com/gmail/v1/users/${userId}/messages`;
+
+      // Make a GET request to the Gmail API with the access token
+      const response = await axios.get(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      // Process the Gmail API response
+      console.log("Gmail API Response:", response.data);
+      // You can handle and display the data as needed
+    } catch (error) {
+      console.error("Error fetching Gmail data:", error);
+    }
+  };
+
   const handleSocial = async () => {
     const provider = new GoogleAuthProvider();
+    provider.addScope("https://www.googleapis.com/auth/gmail.readonly");
 
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential?.accessToken;
-        // The signed-in user info.
-        const user = result.user;
-      })
-      .catch((error) => {
-        // Handle Errors here.
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // The email of the user's account used.
-        const email = error.customData.email;
-        // The AuthCredential type that was used.
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        // ...
-      });
+    const result = await signInWithPopup(auth, provider);
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+
+    //Access toke to fetch gmail data
+    const token = credential?.accessToken;
+    const userId = result.user.email;
+
+    if (token && userId) {
+      // Call the function to fetch Gmail data with the obtained access token
+      await fetchGmailData(token, userId);
+    } else {
+      console.log("Something went wrong");
+    }
   };
 
   return (
@@ -67,6 +85,7 @@ const LoginPage = (props: Props) => {
         />
         <Button onClick={() => handleLogin()}>Login</Button>
         <br /> */}
+
         <Button onClick={() => handleSocial()}>Google</Button>
       </Container>
     </div>

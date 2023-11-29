@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 
 import React from "react";
 
-import { UserAuth } from "@/app/context/AuthContext";
+import { UserAuth } from "@/components/context/AuthContext";
 
 type Props = {
   children: React.ReactNode;

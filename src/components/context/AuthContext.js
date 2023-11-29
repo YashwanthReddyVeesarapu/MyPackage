@@ -1,3 +1,4 @@
+"use client";
 import { useContext, createContext, useState } from "react";
 
 const AuthContext = createContext("auth");
@@ -16,6 +17,8 @@ export const AuthContextProvider = ({ children }) => {
       setLoading(false);
     }, 500);
   });
+
+  console.log(user);
   if (loading)
     return (
       <div className="lds-circle">
