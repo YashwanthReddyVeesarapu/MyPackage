@@ -21,6 +21,7 @@ Schemas :
 Package Schema
 {
 \_id : uuid()
+user_id: string
 tracking_id : string
 carrier_name : string [USPS, UPS , FEDEX]
 sender : {
