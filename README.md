@@ -6,12 +6,6 @@ First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -20,17 +14,41 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-## Learn More
+# Project Plan :
 
-To learn more about Next.js, take a look at the following resources:
+Schemas :
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Package Schema
+{
+\_id : uuid()
+tracking_id : string
+carrier_name : string [USPS, UPS , FEDEX]
+sender : {
+name:string
+img_url : string | null
+}
+tracking_history : [strings]
+status : ["delivered","in_transit", "out_for_delivery", .....]
+tracking_url : string
+last_modified : date
+Origin
+Destination
+}
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Maybe ?
+give product image to front end
+if no tracking data allow user to input
+search route()
 
-## Deploy on Vercel
+front next js app router
+database: mongodb
+backend : Fast API
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Routes :
+await scrapeData() as soon as user logs in scrape the data and store and show a loader
+have a button in the front end and then call it as well
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+have an infinite while loop with sleep(5 ? ) to call updateParcelData()
+
+updateParcelData()
+hit the tracking api to get updated data
