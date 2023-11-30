@@ -2,8 +2,9 @@
 import MainLayout from "@/layouts/MainLayout";
 import "./styles.scss";
 import Input from "@/components/Input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Container from "@/components/Container";
+
 import {
   Accordion,
   AccordionDetails,
@@ -18,6 +19,8 @@ import {
   StepIconProps,
   StepLabel,
   Stepper,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import { Check, ExpandMore, LocalShipping } from "@mui/icons-material";
@@ -47,16 +50,6 @@ const data = [
     image: "",
   },
 ];
-
-const StepperSx = {
-  "& .MuiStepConnector-root": {
-    left: "calc(-50% + 40px)",
-    right: "calc(50% + 40px)",
-  },
-  "& .MuiStepConnector-line": {
-    marginTop: "22px", // To position the line lower
-  },
-};
 
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -122,6 +115,8 @@ function QontoStepIcon(props: StepIconProps) {
 
 export default function Home() {
   const [trackingNumber, setTrackingNumber] = useState("");
+  const [value, setValue] = useState("All");
+  const [filteredData, setFilteredData] = useState<Array<any>>([]);
 
   const track = () => {};
 
@@ -141,76 +136,127 @@ export default function Home() {
     last_location: string;
   };
 
-  return (
-    <>
-      {data.map((item: Item, i) => (
-        <Accordion>
-          <AccordionSummary
-            expandIcon={<ExpandMore />}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
-          >
-            <div style={{ display: "flex", alignItems: "center" }}>
-              {item.image ? (
-                <img
-                  width={"151px"}
-                  src={item.image}
-                  alt="Live from space album cover"
-                />
-              ) : (
-                <LocalShipping style={{ fontSize: "5em" }} />
-              )}
-            </div>
+  console.log(value);
 
-            <CardContent
-              sx={{
-                flex: "1",
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                textAlign: "center",
-              }}
+  const filterOptions = [
+    { value: "All", name: "All" },
+    { value: "Shipped", name: "Shipped" },
+    { value: "Out for delivery", name: "Out for delivery" },
+    { value: "Delivered", name: "Delivered" },
+  ];
+
+  useEffect(() => {
+    //Call data
+
+    setFilteredData(data);
+  }, []);
+
+  useEffect(() => {
+    if (value == "All") {
+      setFilteredData(data);
+    } else setFilteredData(() => data.filter((e) => e.status == value));
+  }, [value]);
+
+  return (
+    <div className="home">
+      <ToggleButtonGroup
+        value={value}
+        exclusive
+        onChange={(event, newValue) => {
+          setValue(newValue);
+        }}
+        style={{
+          background: "#784af4",
+          color: "white",
+          display: "flex",
+          width: "100%",
+        }}
+      >
+        {filterOptions.map((o) => (
+          <ToggleButton style={{ color: "white" }} value={o.value}>
+            {o.name}
+          </ToggleButton>
+        ))}
+      </ToggleButtonGroup>
+
+      {filteredData.length >= 1 ? (
+        filteredData.map((item: Item, i) => (
+          <Accordion>
+            <AccordionSummary
+              expandIcon={<ExpandMore />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
             >
-              <Typography
-                variant={"h2"}
-                style={{
-                  fontSize: "2em",
-                  marginBottom: "20px",
-                  fontWeight: "bold",
+              <div style={{ display: "flex", alignItems: "center" }}>
+                {item.image ? (
+                  <img
+                    width={"151px"}
+                    src={item.image}
+                    alt="Live from space album cover"
+                  />
+                ) : (
+                  <LocalShipping style={{ fontSize: "5em" }} />
+                )}
+              </div>
+
+              <CardContent
+                sx={{
+                  flex: "1",
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  textAlign: "center",
                 }}
               >
-                {item.company_name}
+                <Typography
+                  variant={"h2"}
+                  style={{
+                    fontSize: "2em",
+                    marginBottom: "20px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {item.company_name}
+                </Typography>
+                <Stepper
+                  alternativeLabel
+                  activeStep={steps.findIndex((step) => step == item.status)}
+                  connector={<QontoConnector />}
+                >
+                  {steps.map((label) => (
+                    <Step key={label}>
+                      <Typography>{label}</Typography>
+                      <StepLabel StepIconComponent={QontoStepIcon}></StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
+                <Typography
+                  variant="subtitle1"
+                  color="text.secondary"
+                  component="div"
+                >
+                  {item.last_location}
+                </Typography>
+              </CardContent>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                Suspendisse malesuada lacus ex, sit amet blandit leo lobortis
+                eget.
               </Typography>
-              <Stepper
-                alternativeLabel
-                activeStep={steps.findIndex((step) => step == item.status)}
-                connector={<QontoConnector />}
-              >
-                {steps.map((label) => (
-                  <Step key={label}>
-                    <Typography>{label}</Typography>
-                    <StepLabel StepIconComponent={QontoStepIcon}></StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-              <Typography
-                variant="subtitle1"
-                color="text.secondary"
-                component="div"
-              >
-                {item.last_location}
-              </Typography>
-            </CardContent>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-              Suspendisse malesuada lacus ex, sit amet blandit leo lobortis
-              eget.
+            </AccordionDetails>
+          </Accordion>
+        ))
+      ) : (
+        <Accordion>
+          <AccordionSummary aria-controls="panel1a-content" id="panel1a-header">
+            <Typography style={{ margin: "50px", fontSize: "2em" }}>
+              No Data
             </Typography>
-          </AccordionDetails>
+          </AccordionSummary>
         </Accordion>
-      ))}
+      )}
       {/* <h2> Track My Package</h2>
         <Input
           value={trackingNumber}
@@ -219,6 +265,6 @@ export default function Home() {
           onChange={setTrackingNumber}
         /> */}
       {/* <Button onClick={() => track()}>Track</Button> */}
-    </>
+    </div>
   );
 }
