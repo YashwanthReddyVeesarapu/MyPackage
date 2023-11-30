@@ -14,5 +14,8 @@ export default function Footer(props: Props) {
       <div>
         <Link href={'/contact'}>Contact us</Link>
       </div>
+      <div>
+        <Link href={'/disclaimer'}>Disclaimer</Link>
+      </div>
   </footer>;
 }
