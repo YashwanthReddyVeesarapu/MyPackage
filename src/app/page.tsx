@@ -39,6 +39,8 @@ const data = [
     last_modified: "",
     tracking_number: "",
     image: "",
+    carrier: "FedEx",
+    tracking_link: "",
   },
   {
     _id: "1213123",
@@ -48,6 +50,8 @@ const data = [
     last_modified: "",
     tracking_number: "",
     image: "",
+    carrier: "UPS",
+    tracking_link: "",
   },
 ];
 
@@ -134,6 +138,9 @@ export default function Home() {
     company_name: string;
     image: string;
     last_location: string;
+    tracking_number: string;
+    carrier: string;
+    tracking_link: string;
   };
 
   console.log(value);
@@ -240,11 +247,23 @@ export default function Home() {
               </CardContent>
             </AccordionSummary>
             <AccordionDetails>
-              <Typography>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                Suspendisse malesuada lacus ex, sit amet blandit leo lobortis
-                eget.
-              </Typography>
+              <div className="container">
+                <div className="column">
+                  <span>Tracking ID:</span>
+                  {item.tracking_number ? (
+                    <a href={item.tracking_link}>{item.tracking_number}</a>
+                  ) : (
+                    "N/A"
+                  )}
+                  <span>Last updated:</span>{" "}
+                  {item.last_modified ? item.last_modified : "N/A"}
+                </div>
+                <div className="column">
+                  <span>Carrier:</span> {item.carrier ? item.carrier : "N/A"}
+                  <span>Last Location: </span>{" "}
+                  {item.last_location ? item.last_location : "N/A"}
+                </div>
+              </div>
             </AccordionDetails>
           </Accordion>
         ))
