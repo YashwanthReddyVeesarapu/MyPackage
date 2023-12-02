@@ -15,6 +15,7 @@ import { redirect } from "next/navigation";
 
 import axios from "axios";
 import { Button } from "@mui/material";
+import { Google } from "@mui/icons-material";
 
 type Props = {};
 
@@ -69,6 +70,7 @@ const LoginPage = (props: Props) => {
   return (
     <div>
       <Container>
+        Login with Google
         {/* <h2>Login</h2>
 
         <Input
@@ -85,8 +87,9 @@ const LoginPage = (props: Props) => {
         />
         <Button onClick={() => handleLogin()}>Login</Button>
         <br /> */}
-
-        <Button onClick={() => handleSocial()}>Google</Button>
+        <Button onClick={() => handleSocial()}>
+          <Google style={{ fontSize: "50px" }} />
+        </Button>
       </Container>
     </div>
   );

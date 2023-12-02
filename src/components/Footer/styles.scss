@@ -1,16 +1,24 @@
 footer {
-  height: 25px;
+  height: var(--footer-height);
   display: flex;
-  justify-content:left;
-  background-color: gray;
+  justify-content: left;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-  a {
-    padding: 0;
-    margin: 0;
-    margin: 0 10px;
-    text-decoration: none;
-    color: black;
-    font-size:100%;
-    font-weight: 700;
+  .f-col {
+    display: flex;
+    flex: 0.4;
+    justify-content: center;
   }
+
+  // a {
+  //   padding: 0;
+  //   margin: 0;
+  //   margin: 0 10px;
+  //   text-decoration: none;
+  //   font-size: 100%;
+  //   font-weight: 700;
+  // }
 }

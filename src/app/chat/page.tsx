@@ -1,5 +1,6 @@
 "use client";
 
+import Container from "@/components/Container";
 import MainLayout from "@/layouts/MainLayout";
 import React, { FormEvent, useState } from "react";
 
@@ -22,9 +23,13 @@ const ChatPage = () => {
   };
 
   return (
-    <MainLayout>
-      <h2>Chat Page</h2>
-      {chatLog.map((m: ChatMessage, i: number) => (
+    <Container>
+      <h2>Chat</h2>
+      <p>
+        We are working on chat implemention.... <br />
+        Stay tuned for updates
+      </p>
+      {/* {chatLog.map((m: ChatMessage, i: number) => (
         <div key={i}>{m.content}</div>
       ))}
       <form onSubmit={(e) => handleSubmit(e)}>
@@ -35,8 +40,8 @@ const ChatPage = () => {
           onChange={(e) => setInputValue(e.target.value)}
         />
         <button type="submit">Send</button>
-      </form>
-    </MainLayout>
+      </form> */}
+    </Container>
   );
 };
 

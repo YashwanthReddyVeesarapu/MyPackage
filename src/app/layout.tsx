@@ -1,12 +1,18 @@
 "use client";
 import { onAuthStateChanged } from "firebase/auth";
 import "./globals.css";
-import { Session } from "next-auth";
-import { Inter } from "next/font/google";
+import { Inter, Montserrat } from "next/font/google";
 
 import { AuthContextProvider } from "../components/context/AuthContext";
 
-const inter = Inter({ subsets: ["latin"] });
+// const inter = Inter({ subsets: ["latin"] });
+
+const montserrat = Montserrat({
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  display: "swap",
+});
 
 // export const metadata: Metadata = {
 //   title: "Create Next App",
@@ -15,6 +21,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 import { auth as firebaseAuth } from "@/lib/firebase/config";
 import MainLayout from "@/layouts/MainLayout";
+import { ThemeProvider } from "@emotion/react";
+import { createTheme } from "@mui/material";
 
 export default function RootLayout({
   children,
@@ -26,13 +34,21 @@ export default function RootLayout({
     console.log(user);
   });
 
+  const theme = createTheme({
+    typography: {
+      fontFamily: montserrat.style.fontFamily,
+    },
+  });
+
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <AuthContextProvider>
-          <MainLayout>{children}</MainLayout>
-        </AuthContextProvider>
-      </body>
+      <ThemeProvider theme={theme}>
+        <body className={montserrat.className}>
+          <AuthContextProvider>
+            <MainLayout>{children}</MainLayout>
+          </AuthContextProvider>
+        </body>
+      </ThemeProvider>
     </html>
   );
 }
