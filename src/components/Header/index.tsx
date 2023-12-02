@@ -1,5 +1,6 @@
 import Link from "next/link";
 import "./styles.scss";
+import {Card,CardMedia,CardContent,CardActionArea,Accordion,AccordionSummary,Typography,Grid} from '@mui/material';
 
 export default function Header() {
   return (
@@ -10,6 +11,7 @@ export default function Header() {
       <div>
         <Link href={"/profile"}>Profile</Link>
       </div>
+      
     </header>
   );
 }
