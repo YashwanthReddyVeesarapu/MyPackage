@@ -1,7 +1,7 @@
 "use client";
-import Button from "@/components/Button";
 import Input from "@/components/Input";
 import MainLayout from "@/layouts/MainLayout";
+import { Button } from "@mui/material";
 import React, { useState } from "react";
 
 type Props = {};
