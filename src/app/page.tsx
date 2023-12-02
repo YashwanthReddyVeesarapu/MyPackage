@@ -29,6 +29,7 @@ import StepConnector, {
   stepConnectorClasses,
 } from "@mui/material/StepConnector";
 import { styled } from "@mui/material/styles";
+import Image from "next/image";
 
 const data = [
   {
@@ -179,8 +180,8 @@ export default function Home() {
           width: "100%",
         }}
       >
-        {filterOptions.map((o) => (
-          <ToggleButton style={{ color: "white" }} value={o.value}>
+        {filterOptions.map((o, i) => (
+          <ToggleButton key={i} style={{ color: "white" }} value={o.value}>
             {o.name}
           </ToggleButton>
         ))}
@@ -188,7 +189,7 @@ export default function Home() {
 
       {filteredData.length >= 1 ? (
         filteredData.map((item: Item, i) => (
-          <Accordion>
+          <Accordion key={i}>
             <AccordionSummary
               expandIcon={<ExpandMore />}
               aria-controls="panel1a-content"
@@ -196,8 +197,8 @@ export default function Home() {
             >
               <div style={{ display: "flex", alignItems: "center" }}>
                 {item.image ? (
-                  <img
-                    width={"151px"}
+                  <Image
+                    width={151}
                     src={item.image}
                     alt="Live from space album cover"
                   />
