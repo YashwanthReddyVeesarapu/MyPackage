@@ -14,10 +14,10 @@ const montserrat = Montserrat({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "MyPackge",
-  description: "Track all your packages in a go...",
-};
+// export const metadata: Metadata = {
+//   title: "MyPackge",
+//   description: "Track all your packages in a go...",
+// };
 
 import { auth as firebaseAuth } from "@/lib/firebase/config";
 import MainLayout from "@/layouts/MainLayout";
