@@ -155,7 +155,7 @@ export default function Home() {
       }
     };
 
-    fetchData(); // Call the fetch data function immediately
+    // fetchData(); // Call the fetch data function immediately
 
     // Note: The dependency array should only include 'value'
   }, [value]);

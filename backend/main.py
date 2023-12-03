@@ -16,6 +16,9 @@ app = FastAPI()
 # CORS middleware configuration
 # origins = ["http://localhost", "http://localhost:3000", "https://mypackage.redsols.us/"]
 
+# Define the OAuth2 scheme for Bearer tokens
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 origins = ["*"]
 
 remote_mongodb_uri = "mongodb+srv://yash:1234@mypackagecluster.0vtwzrh.mongodb.net/?retryWrites=true&w=majority"
