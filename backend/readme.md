@@ -4,7 +4,5 @@ after entering the venv :
 sudo apt install python3 --fix-missing
 sudo apt install pip --fix-missing
 pip install -r requirements.txt
-python3 app.py
+uvicorn main:app --reload
 this will host the python server
-deactivate
-to exit the penv
