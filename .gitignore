@@ -32,3 +32,79 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+
+# IDE settings
+.vscode/
+.idea/
+
+# Python environment
+*.python-version
+
+# Logs
+*.log
+
+# User-specific files
+*.rspec
+.sass-cache
+*.sublime-project
+*.sublime-workspace
+*.komodoproject
+.komodoide/
+.gitkeep
+
+# Database
+db.sqlite3
+
+# Compiled source
+__pycache__/
+*.pyc
+
+# Ignore the environment configuration
+.env
+
+# Ignore the Docker Compose file
+docker-compose.yml
+
+# Ignore local configuration files
+local_settings.py
+
+# Ignore the Pipfile and Pipfile.lock (use requirements.txt instead)
+Pipfile
+Pipfile.lock
+
+# Ignore the poetry.lock file (use pyproject.toml for dependencies)
+poetry.lock
+
+# Ignore the Jupyter Notebook metadata directory
+.ipynb_checkpoints/
+
+# Ignore the __pycache__ directory
+__pycache__/
+
+# Ignore the .pytest_cache directory
+.pytest_cache/
+
+# Ignore the .mypy_cache directory
+.mypy_cache/
+
+# Ignore generated documentation
+docs/_build/
+
+# Ignore the poetry export metadata
+poetry-export.json
+
+# Ignore the poetry venv directory
+__pypackages__/
+
+# Ignore pipenv
+Pipfile*
+*.venv
