@@ -31,31 +31,6 @@ import StepConnector, {
 import { styled } from "@mui/material/styles";
 import Image from "next/image";
 
-const data = [
-  {
-    _id: "1213123",
-    company_name: "Apple",
-    status: "Out for delivery",
-    last_location: "Secaucus, NJ, 07310",
-    last_modified: "",
-    tracking_number: "",
-    image: "",
-    carrier: "FedEx",
-    tracking_link: "",
-  },
-  {
-    _id: "1213123",
-    company_name: "Amazon",
-    status: "Shipped",
-    last_location: "San Francisco, CA, 94102",
-    last_modified: "",
-    tracking_number: "",
-    image: "",
-    carrier: "UPS",
-    tracking_link: "",
-  },
-];
-
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
     top: 10,
@@ -153,16 +128,28 @@ export default function Home() {
     { value: "Delivered", name: "Delivered" },
   ];
 
+  const [data, setData] = useState([])!;
   useEffect(() => {
-    //Call data
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/fetch-gmail-data");
+        const jsonData = await response.json();
+        setData(jsonData);
 
-    setFilteredData(data);
-  }, []);
+        // Filter the data based on the selected value
+        if (value === "All") {
+          setFilteredData(jsonData);
+        } else {
+          setFilteredData(jsonData.filter((e) => e.status === value));
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-  useEffect(() => {
-    if (value == "All") {
-      setFilteredData(data);
-    } else setFilteredData(() => data.filter((e) => e.status == value));
+    fetchData(); // Call the fetch data function immediately
+
+    // Note: The dependency array should only include 'value'
   }, [value]);
 
   return (
