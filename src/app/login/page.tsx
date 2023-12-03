@@ -17,6 +17,8 @@ import axios from "axios";
 import { Button } from "@mui/material";
 import { Google } from "@mui/icons-material";
 
+import { apiInstance } from "@/lib/api/apiInstance";
+
 type Props = {};
 
 const LoginPage = (props: Props) => {
@@ -61,6 +63,16 @@ const LoginPage = (props: Props) => {
 
     if (token && userId) {
       // Call the function to fetch Gmail data with the obtained access token
+
+      const userData = {
+        uid: result.user.uid,
+        displayName: result.user.displayName,
+        email: result.user.email,
+        token: token,
+      };
+      const insertUserResponse = await apiInstance.post("/users", userData);
+      console.log(insertUserResponse);
+
       await fetchGmailData(token, userId);
     } else {
       console.log("Something went wrong");
@@ -69,6 +81,7 @@ const LoginPage = (props: Props) => {
 
   return (
     <div>
+      <h2>Login is required to user our services</h2>
       <Container>
         Login with Google
         {/* <h2>Login</h2>
