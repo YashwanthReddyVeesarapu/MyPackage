@@ -30,6 +30,9 @@ import StepConnector, {
 } from "@mui/material/StepConnector";
 import { styled } from "@mui/material/styles";
 import Image from "next/image";
+import { apiInstance } from "@/lib/api/apiInstance";
+import { UserAuth } from "@/components/context/AuthContext";
+import { redirect } from "next/navigation";
 
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -98,7 +101,11 @@ export default function Home() {
   const [value, setValue] = useState("All");
   const [filteredData, setFilteredData] = useState<Array<any>>([]);
 
-  const track = () => {};
+  const user = UserAuth();
+
+  if (!user) {
+    return redirect("/login");
+  }
 
   const steps = [
     "Waiting for details",
@@ -129,18 +136,19 @@ export default function Home() {
   ];
 
   const [data, setData] = useState([])!;
-  useEffect(() => {
+
+  const auth = useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/fetch-gmail-data");
-        const jsonData = await response.json();
+        const response = await apiInstance.get("/fetch-gmail-data");
+        const jsonData = response.data;
         setData(jsonData);
 
         // Filter the data based on the selected value
         if (value === "All") {
           setFilteredData(jsonData);
         } else {
-          setFilteredData(jsonData.filter((e) => e.status === value));
+          setFilteredData(jsonData.filter((e: any) => e.status === value));
         }
       } catch (error) {
         console.error("Error fetching data:", error);
