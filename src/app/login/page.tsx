@@ -31,12 +31,14 @@ const LoginPage = (props: Props) => {
   const fetchGmailData = async (accessToken: string, userId: string) => {
     try {
       // Specify the Gmail API endpoint for the user's messages
-      const apiUrl = `https://gmail.googleapis.com/gmail/v1/users/${userId}/messages`;
+      // const apiUrl = `https://gmail.googleapis.com/gmail/v1/users/${userId}/messages`;
 
+      const apiUrl = `http://127.0.0.1:8000/fetch-gmail-data`;
       // Make a GET request to the Gmail API with the access token
       const response = await axios.get(apiUrl, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          UserId: userId,
         },
       });
 
