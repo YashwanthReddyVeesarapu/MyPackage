@@ -11,3 +11,4 @@ Werkzeug==3.0.1
 uvicorn
 fastapi
 uvicorn[standard]
+requests
