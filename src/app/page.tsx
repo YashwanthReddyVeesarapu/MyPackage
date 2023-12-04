@@ -138,6 +138,10 @@ export default function Home() {
   ];
 
   useEffect(() => {
+    setFilteredData(data);
+  }, [data]);
+
+  useEffect(() => {
     if (!data) return;
     if (value === "All") {
       setFilteredData(data);

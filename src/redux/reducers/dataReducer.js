@@ -4,7 +4,7 @@ const dataReducer = (state = initialState, action) => {
   const { type, payload } = action;
 
   switch (type) {
-    case "FETCH_DATA":
+    case "SET_DATA":
       return {
         items: payload,
         last_modified: new Date(),
