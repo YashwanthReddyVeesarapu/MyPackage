@@ -2,6 +2,7 @@
 const nextConfig = {
   output: "export",
   trailingSlash: true,
+  images: { unoptimized: true },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Exclude server-only modules from being bundled on the client side

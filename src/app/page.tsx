@@ -22,6 +22,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
+  ImageList,
 } from "@mui/material";
 import { Check, ExpandMore, LocalShipping } from "@mui/icons-material";
 
@@ -187,7 +188,8 @@ export default function Home() {
               <div style={{ display: "flex", alignItems: "center" }}>
                 {item.image ? (
                   <Image
-                    width={151}
+                    width={50}
+                    height={50}
                     src={item.image}
                     alt="Live from space album cover"
                   />
