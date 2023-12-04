@@ -105,15 +105,11 @@ export default function Home() {
 
   const state = useSelector((state: any) => state);
 
-  console.log(state);
+  const data = state.data.items;
 
   const dispatch = useDispatch();
 
   const context: any = UserAuth();
-
-  if (!context.user) {
-    return redirect("/login");
-  }
 
   const steps = [
     "Waiting for details",
@@ -141,8 +137,6 @@ export default function Home() {
     { value: "Delivered", name: "Delivered" },
   ];
 
-  const [data, setData] = useState([])!;
-
   useEffect(() => {
     if (!data) return;
     if (value === "All") {
@@ -151,6 +145,10 @@ export default function Home() {
       setFilteredData(data.filter((e: any) => e.status === value));
     }
   }, [value]);
+
+  if (!context.user) {
+    return redirect("/login");
+  }
 
   return (
     <div className="home">
