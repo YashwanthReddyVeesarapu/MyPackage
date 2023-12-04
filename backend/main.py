@@ -174,6 +174,29 @@ def extract_package_data(message: dict):
             carrier_name = (message_body[match.start() : match.end()]).lower()
             break
 
+    status_patterns = [
+        r"\bdelivered\b",
+        r"\btransit\b",
+        r"\barriving\b",
+        r"\bdelivery\b",
+        # Add more patterns as needed
+    ]
+    status = None
+    # Check if any of the patterns match the email text
+    for index, pattern in enumerate(status_patterns):
+        match = re.search(pattern, message_body, re.IGNORECASE)
+        if match:
+            status = (
+                "Delivered"
+                if index == 0
+                else "In Transit"
+                if index == 1 or index == 3
+                else "Out for delivery"
+                if index == 2
+                else "Waiting for details"
+            )
+            break
+
     # Extract relevant information from the classified message
     # call the respective api to get the data
     tracking_link = None
@@ -187,7 +210,7 @@ def extract_package_data(message: dict):
     package_data = {
         "_id": tracking_number,
         "company_name": sender,
-        "status": "--",
+        "status": status if status else "--",
         "last_location": "--",
         "last_modified": "--",
         "tracking_number": tracking_number if tracking_number else "--",
