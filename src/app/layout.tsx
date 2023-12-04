@@ -1,5 +1,4 @@
 "use client";
-import { onAuthStateChanged } from "firebase/auth";
 import "./globals.css";
 import { Inter, Montserrat } from "next/font/google";
 
@@ -31,9 +30,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const auth = firebaseAuth;
-  onAuthStateChanged(auth, (user) => {
-    console.log(user);
-  });
 
   const theme = createTheme({
     typography: {

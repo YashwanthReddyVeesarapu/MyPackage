@@ -33,6 +33,7 @@ import Image from "next/image";
 import { apiInstance } from "@/lib/api/apiInstance";
 import { UserAuth } from "@/components/context/AuthContext";
 import { redirect } from "next/navigation";
+import { GoogleAuthProvider, getAuth } from "firebase/auth";
 
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -101,9 +102,19 @@ export default function Home() {
   const [value, setValue] = useState("All");
   const [filteredData, setFilteredData] = useState<Array<any>>([]);
 
-  const user = UserAuth();
+  const auth = getAuth();
 
-  if (!user) {
+  const context: any = UserAuth();
+
+  const tk = localStorage.getItem("token");
+
+  if (!tk) {
+    auth.signOut();
+  }
+
+  console.log(context);
+
+  if (!context.user) {
     return redirect("/login");
   }
 
@@ -137,13 +148,13 @@ export default function Home() {
 
   const [data, setData] = useState([])!;
 
-  const auth = useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await apiInstance.get("/fetch-gmail-data", {
           headers: {
-            Authorization: `Bearer ${user.accessToken}`,
-            UserId: user.email,
+            Authorization: `Bearer ${tk}`,
+            UserId: context.user.email,
           },
         });
         const jsonData = response.data;

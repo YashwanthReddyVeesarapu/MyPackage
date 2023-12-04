@@ -21,14 +21,22 @@ import { apiInstance } from "@/lib/api/apiInstance";
 
 type Props = {};
 
+type Context = {
+  user: any;
+  access: string;
+  setAccessToken: any;
+};
+
 const LoginPage = (props: Props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const auth = getAuth();
-  const user = UserAuth();
+  const context: any = UserAuth();
 
-  if (user) return redirect("/profile");
+  console.log(context);
+
+  if (context.user) return redirect("/profile");
 
   const fetchGmailData = async (accessToken: string, userId: string) => {
     try {
@@ -57,14 +65,19 @@ const LoginPage = (props: Props) => {
     provider.addScope("https://www.googleapis.com/auth/gmail.readonly");
 
     const result = await signInWithPopup(auth, provider);
+
     const credential = GoogleAuthProvider.credentialFromResult(result);
 
     //Access toke to fetch gmail data
-    const token = credential?.accessToken;
+    const token: any = credential?.accessToken;
+
     const userId = result.user.email;
+
+    context.setAccess(token);
 
     if (token && userId) {
       // Call the function to fetch Gmail data with the obtained access token
+      localStorage.setItem("token", token);
 
       const userData = {
         uid: result.user.uid,

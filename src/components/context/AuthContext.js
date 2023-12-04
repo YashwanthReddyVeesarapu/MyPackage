@@ -1,24 +1,25 @@
 "use client";
-import { useContext, createContext, useState } from "react";
+import { useContext, createContext, useState, useEffect } from "react";
 
 const AuthContext = createContext("auth");
 
 import { auth } from "@/lib/firebase/config";
-import { onAuthStateChanged } from "firebase/auth";
+import { GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [access, setAccess] = useState(null);
 
   const [loading, setLoading] = useState(true);
 
   onAuthStateChanged(auth, (user) => {
     setUser(user);
+
     setTimeout(() => {
       setLoading(false);
     }, 500);
   });
 
-  console.log(user);
   if (loading)
     return (
       <div className="lds-circle">
@@ -26,7 +27,15 @@ export const AuthContextProvider = ({ children }) => {
       </div>
     );
 
-  return <AuthContext.Provider value={user}>{children}</AuthContext.Provider>;
+  const contextValue = {
+    user,
+    access,
+    setAccess,
+  };
+
+  return (
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
 };
 
 export const UserAuth = () => {

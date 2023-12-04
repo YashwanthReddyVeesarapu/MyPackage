@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@mui/material";
 
 const ProfilePage = () => {
-  const user = UserAuth();
+  const context: any = UserAuth();
 
   const auth = getAuth();
 
@@ -16,14 +16,14 @@ const ProfilePage = () => {
     signOut(auth);
   };
 
-  if (!user) {
+  if (!context.user) {
     redirect("/login");
   }
   return (
     <>
-      {user && (
+      {context.user && (
         <Container>
-          {<h3>Hey {user.displayName}, Welcome to MyPackage</h3>}
+          {<h3>Hey {context.user.displayName}, Welcome to MyPackage</h3>}
           <Button onClick={() => handleLogout()}>Logout</Button>
         </Container>
       )}
