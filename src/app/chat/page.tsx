@@ -24,23 +24,11 @@ const ChatPage = () => {
 
   return (
     <Container>
-      <h2>Chat</h2>
+      <h2>Google Integrations</h2>
       <p>
-        We are working on chat implemention.... <br />
+        We are working on Google Calendar and TODO list implemention.... <br />
         Stay tuned for updates
       </p>
-      {/* {chatLog.map((m: ChatMessage, i: number) => (
-        <div key={i}>{m.content}</div>
-      ))}
-      <form onSubmit={(e) => handleSubmit(e)}>
-        <input
-          type="text"
-          placeholder="Type your message here..."
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-        />
-        <button type="submit">Send</button>
-      </form> */}
     </Container>
   );
 };
