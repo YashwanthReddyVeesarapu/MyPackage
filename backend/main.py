@@ -93,12 +93,13 @@ def classify_messages(messages: List[Dict]) -> List[Dict]:
     classified_messages = []
 
     for message in messages:
-        message_body = get_message_body(message)
-        # Placeholder for a hypothetical machine learning model
-        has_tracking = has_tracking_info(message_body)
+        if "SENT" not in message["labelIds"]:
+            message_body = get_message_body(message)
+            # Placeholder for a hypothetical machine learning model
+            has_tracking = has_tracking_info(message_body)
 
-        if has_tracking:
-            classified_messages.append(message)
+            if has_tracking:
+                classified_messages.append(message)
 
     return classified_messages
 
