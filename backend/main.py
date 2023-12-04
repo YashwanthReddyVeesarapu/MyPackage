@@ -146,6 +146,9 @@ def extract_package_data(message: dict):
 
     tracking_patterns = [
         r"\btracknum=(\w+)\b",
+        r"\btrknbr=(\w+)\b",
+        r"\btrackingnumber=(\w+)\b",
+        r"\btracknumbers=(\w+)\b",
         # Add more patterns as needed
     ]
 
@@ -154,13 +157,12 @@ def extract_package_data(message: dict):
     for index, pattern in enumerate(tracking_patterns):
         match = re.search(pattern, message_body, re.IGNORECASE)
         if match:
-            tracking_number = (
-                message_body[match.start() : match.end()] if index == 0 else None
-            ).split("=")[1]
+            tracking_number = (message_body[match.start() : match.end()]).split("=")[1]
             break
 
     carrier_patterns = [
         r"\bUPS\b",
+        r"\bFedex\b",
         # Add more patterns as needed
     ]
     carrier_name = None
@@ -168,22 +170,18 @@ def extract_package_data(message: dict):
     for index, pattern in enumerate(carrier_patterns):
         match = re.search(pattern, message_body, re.IGNORECASE)
         if match:
-            carrier_name = (
-                message_body[match.start() : match.end()] if index == 0 else None
-            )
+            carrier_name = (message_body[match.start() : match.end()]).lower()
             break
 
     # Extract relevant information from the classified message
     # call the respective api to get the data
     tracking_link = None
-    if carrier_name == "UPS":
-        api_url = f"https://www.ups.com/track/api/Track/GetStatus?loc=en_US&requester=ST/trackdetails&tracknum={tracking_number}"
-        headers = {"Content-Type": "application/json"}
-        result = requests.get(api_url, headers=headers)
-        # Check for errors in the initial call
-        result.raise_for_status()
-        # Get the list of message IDs
-        print(result.json())
+    if carrier_name == "ups":
+        tracking_link = "https://www.ups.com/track?loc=en_US&tracknum={tracking_number}"
+        image = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/United_Parcel_Service_logo_2014.svg/640px-United_Parcel_Service_logo_2014.svg.png"
+    if carrier_name == "fedex":
+        tracking_link = f"https://www.fedex.com/fedextrack/?action=track&trackingnumber={tracking_number}"
+        image = "https://1000logos.net/wp-content/uploads/2021/04/Fedex-logo.png"
     # Return the data in your Package schema format
     package_data = {
         "_id": tracking_number,
@@ -192,7 +190,7 @@ def extract_package_data(message: dict):
         "last_location": "--",
         "last_modified": "--",
         "tracking_number": tracking_number if tracking_number else "--",
-        "image": "",
+        "image": image if image else "",
         "carrier": carrier_name if carrier_name else "--",
         "tracking_link": tracking_link
         if tracking_link
