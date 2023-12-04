@@ -219,33 +219,7 @@ def fetch_gmail_data(
     # Process and store the classified messages
     processed_packages = process_and_store_packages(UserId, classified_messages)
 
-    # return processed_packages
-
-    data = [
-        {
-            "_id": "1213123",
-            "company_name": "Apple",
-            "status": "Out for delivery",
-            "last_location": "Secaucus, NJ, 07310",
-            "last_modified": "",
-            "tracking_number": "",
-            "image": "",
-            "carrier": "FedEx",
-            "tracking_link": "",
-        },
-        {
-            "_id": "1213123",
-            "company_name": "Amazon",
-            "status": "Shipped",
-            "last_location": "San Francisco, CA, 94102",
-            "last_modified": "",
-            "tracking_number": "",
-            "image": "",
-            "carrier": "UPS",
-            "tracking_link": "",
-        },
-    ]
-    return data
+    return processed_packages
 
 
 def check_existing_user(email):

@@ -154,7 +154,7 @@ export default function Home() {
           },
         });
         const jsonData = response.data;
-
+        console.log(jsonData);
         setData(jsonData);
 
         // Filter the data based on the selected value
@@ -170,34 +170,8 @@ export default function Home() {
         console.error("Error fetching data:", error);
       }
     };
-    // fetchData(); // Call the fetch data function immediately
-    const mock_data = [
-      {
-        _id: "1213123",
-        company_name: "Apple",
-        status: "Out for delivery",
-        last_location: "Secaucus, NJ, 07310",
-        last_modified: "",
-        tracking_number: "",
-        image: "",
-        carrier: "FedEx",
-        tracking_link: "",
-      },
-      {
-        _id: "1213123",
-        company_name: "Amazon",
-        status: "Shipped",
-        last_location: "San Francisco, CA, 94102",
-        last_modified: "",
-        tracking_number: "",
-        image: "",
-        carrier: "UPS",
-        tracking_link: "",
-      },
-    ];
-    // temporary mocking code
-    setData(mock_data);
-    setFilteredData(mock_data);
+    fetchData(); // Call the fetch data function immediately
+
     // Note: The dependency array should only include 'value'
   }, [value]);
 
