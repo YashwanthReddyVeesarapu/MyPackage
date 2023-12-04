@@ -149,6 +149,7 @@ def extract_package_data(message: dict):
         r"\btrknbr=(\w+)\b",
         r"\btrackingnumber=(\w+)\b",
         r"\btracknumbers=(\w+)\b",
+        r"\btracking_numbers=(\w+)\b",
         # Add more patterns as needed
     ]
 
