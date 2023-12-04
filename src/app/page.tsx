@@ -176,7 +176,7 @@ export default function Home() {
         ))}
       </ToggleButtonGroup>
 
-      {filteredData.length >= 1 ? (
+      {filteredData?.length >= 1 ? (
         filteredData.map((item: Item, i) => (
           <Accordion key={i}>
             <AccordionSummary
