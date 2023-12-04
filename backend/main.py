@@ -74,6 +74,7 @@ def has_tracking_info(message: dict) -> bool:
 
     # Define patterns that indicate tracking information
     tracking_patterns = [
+        r"\btrack\b",
         r"\btracking\b",
         r"\btracking number\b",
         r"\btracking info\b",
@@ -136,7 +137,38 @@ def extract_package_data(message: dict):
     sender = get_sender(message)
     recipient = get_recipient(message)
 
+    tracking_patterns = [
+        r"\btracknum=(\w+)\b",
+        # Add more patterns as needed
+    ]
+
+    tracking_number = None
+    # Check if any of the patterns match the email text
+    for index, pattern in enumerate(tracking_patterns):
+        match = re.search(pattern, message_body, re.IGNORECASE)
+        if match:
+            tracking_number = (
+                message_body[match.start() : match.end()] if index == 0 else None
+            ).split("=")[1]
+            break
+
+    carrier_patterns = [
+        r"\bUPS\b",
+        # Add more patterns as needed
+    ]
+    carrier_name = None
+    # Check if any of the patterns match the email text
+    for index, pattern in enumerate(carrier_patterns):
+        match = re.search(pattern, message_body, re.IGNORECASE)
+        if match:
+            carrier_name = (
+                message_body[match.start() : match.end()] if index == 0 else None
+            )
+            break
+
     # Extract relevant information from the classified message
+    # call the respective api to get the data
+
     # Return the data in your Package schema format
     package_data = {
         "_id": "a123123asd",
@@ -144,10 +176,10 @@ def extract_package_data(message: dict):
         "status": "Out for delivery",
         "last_location": "Secaucus, NJ, 07310",
         "last_modified": "",
-        "tracking_number": "",
+        "tracking_number": tracking_number,
         "image": "",
-        "carrier": "FedEx",
-        "tracking_link": "",
+        "carrier": carrier_name,
+        "tracking_link": "",  # You can extract this if needed
     }
     return package_data
 
