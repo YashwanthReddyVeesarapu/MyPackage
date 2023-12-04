@@ -7,7 +7,7 @@ const dataReducer = (state = initialState, action) => {
     case "SET_DATA":
       return {
         items: payload,
-        last_modified: new Date(),
+        last_modified: new Date().toUTCString(),
       };
 
     default:

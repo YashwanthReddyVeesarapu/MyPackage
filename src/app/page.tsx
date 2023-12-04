@@ -24,7 +24,12 @@ import {
   Typography,
   ImageList,
 } from "@mui/material";
-import { Check, ExpandMore, LocalShipping } from "@mui/icons-material";
+import {
+  Check,
+  ExpandMore,
+  LocalShipping,
+  RefreshOutlined,
+} from "@mui/icons-material";
 
 import StepConnector, {
   stepConnectorClasses,
@@ -36,6 +41,7 @@ import { UserAuth } from "@/components/context/AuthContext";
 import { redirect } from "next/navigation";
 import { GoogleAuthProvider, getAuth } from "firebase/auth";
 import { useDispatch, useSelector } from "react-redux";
+import { setData } from "@/redux/actions";
 
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -104,9 +110,11 @@ export default function Home() {
   const [value, setValue] = useState("All");
   const [filteredData, setFilteredData] = useState<Array<any>>([]);
 
+  const [itemsData, setItemsData] = useState([]);
+
   const state = useSelector((state: any) => state);
 
-  const data = state.data.items;
+  const auth = getAuth();
 
   const dispatch = useDispatch();
 
@@ -138,18 +146,56 @@ export default function Home() {
     { value: "Delivered", name: "Delivered" },
   ];
 
-  useEffect(() => {
-    setFilteredData(data);
-  }, [data]);
+  const fetchItemsData = async () => {
+    const token = state.user.token;
+    const email = state.user.email;
+    console.log("FETCHING");
+    try {
+      const items = await apiInstance.get("/fetch-gmail-data", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          UserId: email,
+        },
+      });
+      dispatch(setData(items.data));
+    } catch (error) {
+      console.log(error);
+      alert("Login token expired");
+      auth.signOut();
+    }
+  };
 
   useEffect(() => {
-    if (!data) return;
-    if (value === "All") {
-      setFilteredData(data);
-    } else {
-      setFilteredData(data.filter((e: any) => e.status === value));
+    console.log(state);
+
+    if (
+      state.data.items &&
+      state.data.items.length > 0 &&
+      state.data.items != itemsData
+    ) {
+      setItemsData(state.items.data);
     }
-  }, [value]);
+  }, [state]);
+
+  useEffect(() => {
+    if (state.data.last_modified) {
+      const currentTime = Date.now();
+      const timeDifference = currentTime - Date.parse(state.data.last_modified);
+      console.log(timeDifference);
+
+      if (timeDifference < 60000) return;
+    }
+    if (itemsData.length < 1) fetchItemsData();
+  }, []);
+
+  useEffect(() => {
+    if (!itemsData || itemsData.length < 0) return;
+    if (value === "All") {
+      setFilteredData(itemsData);
+    } else {
+      setFilteredData(itemsData.filter((e: any) => e.status === value));
+    }
+  }, [itemsData, value]);
 
   if (!context.user) {
     return redirect("/login");
@@ -175,6 +221,18 @@ export default function Home() {
             {o.name}
           </ToggleButton>
         ))}
+
+        <div
+          style={{
+            display: "flex",
+            flex: 1,
+            justifyContent: "flex-end",
+          }}
+        >
+          <IconButton style={{ color: "white" }} onClick={fetchItemsData}>
+            <RefreshOutlined />
+          </IconButton>
+        </div>
       </ToggleButtonGroup>
 
       {filteredData?.length >= 1 ? (

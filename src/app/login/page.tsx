@@ -59,6 +59,7 @@ const LoginPage = (props: Props) => {
       // You can handle and display the data as needed
     } catch (error) {
       console.error("Error fetching Gmail data:", error);
+      alert("Something went wrong while fetching data");
     }
   };
 
@@ -91,8 +92,8 @@ const LoginPage = (props: Props) => {
         token: token,
       };
       dispatch(setUserData(userData));
-      const insertUserResponse = await apiInstance.post("/users", userData);
-      console.log(insertUserResponse);
+      // const insertUserResponse = await apiInstance.post("/users", userData);
+      // console.log(insertUserResponse);
 
       // await fetchGmailData(token, userId);
     } else {
