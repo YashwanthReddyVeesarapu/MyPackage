@@ -94,13 +94,16 @@ def classify_messages(messages: List[Dict]) -> List[Dict]:
 
     for message in messages:
         if "SENT" not in message["labelIds"]:
-            message_body = get_message_body(message)
-            # Placeholder for a hypothetical machine learning model
-            has_tracking = has_tracking_info(message_body)
+            try:
+                message_body = get_message_body(message)
+                # Placeholder for a hypothetical machine learning model
+                has_tracking = has_tracking_info(message_body)
 
-            if has_tracking:
-                classified_messages.append(message)
-
+                if has_tracking:
+                    classified_messages.append(message)
+            except Exception as e:
+                print(e)
+                continue
     return classified_messages
 
 
@@ -108,13 +111,16 @@ def process_and_store_packages(UserId: str, classified_messages: List[dict]):
     processed_packages = []
     for message in classified_messages:
         # Extract relevant information and create your Package schema
-        package_data = extract_package_data(message)
+        try:
+            package_data = extract_package_data(message)
 
-        # Store the package data in your database
-        store_package_data(UserId, package_data)
+            # Store the package data in your database
+            store_package_data(UserId, package_data)
 
-        processed_packages.append(package_data)
-
+            processed_packages.append(package_data)
+        except Exception as e:
+            print(e)
+            continue
     return processed_packages
 
 
@@ -169,18 +175,28 @@ def extract_package_data(message: dict):
 
     # Extract relevant information from the classified message
     # call the respective api to get the data
-
+    tracking_link = None
+    if carrier_name == "UPS":
+        api_url = f"https://www.ups.com/track/api/Track/GetStatus?loc=en_US&requester=ST/trackdetails&tracknum={tracking_number}"
+        headers = {"Content-Type": "application/json"}
+        result = requests.get(api_url, headers=headers)
+        # Check for errors in the initial call
+        result.raise_for_status()
+        # Get the list of message IDs
+        print(result.json())
     # Return the data in your Package schema format
     package_data = {
-        "_id": "a123123asd",
+        "_id": tracking_number,
         "company_name": sender,
-        "status": "Out for delivery",
-        "last_location": "Secaucus, NJ, 07310",
-        "last_modified": "",
-        "tracking_number": tracking_number,
+        "status": "--",
+        "last_location": "--",
+        "last_modified": "--",
+        "tracking_number": tracking_number if tracking_number else "--",
         "image": "",
-        "carrier": carrier_name,
-        "tracking_link": "",  # You can extract this if needed
+        "carrier": carrier_name if carrier_name else "--",
+        "tracking_link": tracking_link
+        if tracking_link
+        else "--",  # You can extract this if needed
     }
     return package_data
 
