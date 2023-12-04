@@ -34,6 +34,7 @@ import { apiInstance } from "@/lib/api/apiInstance";
 import { UserAuth } from "@/components/context/AuthContext";
 import { redirect } from "next/navigation";
 import { GoogleAuthProvider, getAuth } from "firebase/auth";
+import { useDispatch, useSelector } from "react-redux";
 
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -102,15 +103,13 @@ export default function Home() {
   const [value, setValue] = useState("All");
   const [filteredData, setFilteredData] = useState<Array<any>>([]);
 
-  const auth = getAuth();
+  const state = useSelector((state: any) => state);
+
+  console.log(state);
+
+  const dispatch = useDispatch();
 
   const context: any = UserAuth();
-
-  const tk = localStorage.getItem("token");
-
-  if (!tk) {
-    auth.signOut();
-  }
 
   if (!context.user) {
     return redirect("/login");
@@ -145,34 +144,12 @@ export default function Home() {
   const [data, setData] = useState([])!;
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await apiInstance.get("/fetch-gmail-data", {
-          headers: {
-            Authorization: `Bearer ${tk}`,
-            UserId: context.user.email,
-          },
-        });
-        const jsonData = response.data;
-        console.log(jsonData);
-        setData(jsonData);
-
-        // Filter the data based on the selected value
-        if (value === "All") {
-          setFilteredData(jsonData);
-        } else {
-          setFilteredData(jsonData.filter((e: any) => e.status === value));
-        }
-      } catch (error: any) {
-        if (error.status == 401) {
-          auth.signOut();
-        }
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData(); // Call the fetch data function immediately
-
-    // Note: The dependency array should only include 'value'
+    if (!data) return;
+    if (value === "All") {
+      setFilteredData(data);
+    } else {
+      setFilteredData(data.filter((e: any) => e.status === value));
+    }
   }, [value]);
 
   return (

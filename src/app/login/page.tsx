@@ -18,6 +18,9 @@ import { Button } from "@mui/material";
 import { Google } from "@mui/icons-material";
 
 import { apiInstance } from "@/lib/api/apiInstance";
+import { useDispatch } from "react-redux";
+
+import { setData, setUserData } from "@/redux/actions";
 
 type Props = {};
 
@@ -30,6 +33,8 @@ type Context = {
 const LoginPage = (props: Props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const dispatch = useDispatch();
 
   const auth = getAuth();
   const context: any = UserAuth();
@@ -50,8 +55,7 @@ const LoginPage = (props: Props) => {
         },
       });
 
-      // Process the Gmail API response
-      console.log("Gmail API Response:", response.data);
+      return response.data;
       // You can handle and display the data as needed
     } catch (error) {
       console.error("Error fetching Gmail data:", error);
@@ -75,7 +79,10 @@ const LoginPage = (props: Props) => {
 
     if (token && userId) {
       // Call the function to fetch Gmail data with the obtained access token
-      localStorage.setItem("token", token);
+
+      const items = await fetchGmailData(token, userId);
+
+      dispatch(setData(items));
 
       const userData = {
         uid: result.user.uid,
@@ -83,10 +90,11 @@ const LoginPage = (props: Props) => {
         email: result.user.email,
         token: token,
       };
+      dispatch(setUserData(userData));
       const insertUserResponse = await apiInstance.post("/users", userData);
       console.log(insertUserResponse);
 
-      await fetchGmailData(token, userId);
+      // await fetchGmailData(token, userId);
     } else {
       console.log("Something went wrong");
     }

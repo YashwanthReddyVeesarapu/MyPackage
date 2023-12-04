@@ -14,10 +14,7 @@ export const AuthContextProvider = ({ children }) => {
 
   onAuthStateChanged(auth, (user) => {
     setUser(user);
-
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
+    setLoading(false);
   });
 
   if (loading)
@@ -31,6 +28,7 @@ export const AuthContextProvider = ({ children }) => {
     user,
     access,
     setAccess,
+    setLoading,
   };
 
   return (
