@@ -160,7 +160,7 @@ export default function Home() {
       }
     };
     // fetchData(); // Call the fetch data function immediately
-    const data = [
+    const mock_data = [
       {
         _id: "1213123",
         company_name: "Apple",
@@ -185,8 +185,8 @@ export default function Home() {
       },
     ];
     // temporary mocking code
-    setData(data);
-    setFilteredData(data);
+    setData(mock_data);
+    setFilteredData(mock_data);
     // Note: The dependency array should only include 'value'
   }, [value]);
 
