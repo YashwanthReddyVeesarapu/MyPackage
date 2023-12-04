@@ -159,8 +159,34 @@ export default function Home() {
         console.error("Error fetching data:", error);
       }
     };
-    fetchData(); // Call the fetch data function immediately
-
+    // fetchData(); // Call the fetch data function immediately
+    const data = [
+      {
+        _id: "1213123",
+        company_name: "Apple",
+        status: "Out for delivery",
+        last_location: "Secaucus, NJ, 07310",
+        last_modified: "",
+        tracking_number: "",
+        image: "",
+        carrier: "FedEx",
+        tracking_link: "",
+      },
+      {
+        _id: "1213123",
+        company_name: "Amazon",
+        status: "Shipped",
+        last_location: "San Francisco, CA, 94102",
+        last_modified: "",
+        tracking_number: "",
+        image: "",
+        carrier: "UPS",
+        tracking_link: "",
+      },
+    ];
+    // temporary mocking code
+    setData(data);
+    setFilteredData(data);
     // Note: The dependency array should only include 'value'
   }, [value]);
 
