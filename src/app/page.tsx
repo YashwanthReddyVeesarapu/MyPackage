@@ -169,11 +169,11 @@ export default function Home() {
     console.log(state);
 
     if (
-      state.data.items &&
-      state.data.items.length > 0 &&
-      state.data.items != itemsData
+      state?.data?.items &&
+      state?.data?.items.length > 0 &&
+      state?.data?.items != itemsData
     ) {
-      setItemsData(state.items.data);
+      setItemsData(state?.data?.items);
     }
   }, [state]);
 
