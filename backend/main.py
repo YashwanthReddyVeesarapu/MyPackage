@@ -187,7 +187,7 @@ def fetch_gmail_data(
     # Process and store the classified messages
     processed_packages = process_and_store_packages(UserId, classified_messages)
 
-    return processed_packages
+    # return processed_packages
 
     data = [
         {
