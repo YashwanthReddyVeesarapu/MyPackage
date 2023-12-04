@@ -140,7 +140,12 @@ export default function Home() {
   const auth = useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await apiInstance.get("/fetch-gmail-data");
+        const response = await apiInstance.get("/fetch-gmail-data", {
+          headers: {
+            Authorization: `Bearer ${user.accessToken}`,
+            UserId: user.email,
+          },
+        });
         const jsonData = response.data;
         setData(jsonData);
 
@@ -154,8 +159,7 @@ export default function Home() {
         console.error("Error fetching data:", error);
       }
     };
-
-    // fetchData(); // Call the fetch data function immediately
+    fetchData(); // Call the fetch data function immediately
 
     // Note: The dependency array should only include 'value'
   }, [value]);

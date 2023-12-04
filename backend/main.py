@@ -8,7 +8,7 @@ from fastapi import FastAPI, Depends, HTTPException, Header, status
 from fastapi.security import OAuth2PasswordBearer
 import requests
 import base64
-
+from bson import ObjectId
 
 app = FastAPI()
 
@@ -139,6 +139,7 @@ def extract_package_data(message: dict):
     # Extract relevant information from the classified message
     # Return the data in your Package schema format
     package_data = {
+        "_id": "a123123asd",
         "company_name": sender,
         "status": "Out for delivery",
         "last_location": "Secaucus, NJ, 07310",
@@ -186,7 +187,7 @@ def fetch_gmail_data(
     # Process and store the classified messages
     processed_packages = process_and_store_packages(UserId, classified_messages)
 
-    # return {"packages": processed_packages}
+    return processed_packages
 
     data = [
         {
