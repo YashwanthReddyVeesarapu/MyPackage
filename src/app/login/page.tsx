@@ -34,8 +34,6 @@ const LoginPage = (props: Props) => {
   const auth = getAuth();
   const context: any = UserAuth();
 
-  console.log(context);
-
   if (context.user) return redirect("/profile");
 
   const fetchGmailData = async (accessToken: string, userId: string) => {

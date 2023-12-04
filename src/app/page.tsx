@@ -112,8 +112,6 @@ export default function Home() {
     auth.signOut();
   }
 
-  console.log(context);
-
   if (!context.user) {
     return redirect("/login");
   }
@@ -137,8 +135,6 @@ export default function Home() {
     tracking_link: string;
   };
 
-  console.log(value);
-
   const filterOptions = [
     { value: "All", name: "All" },
     { value: "Shipped", name: "Shipped" },
@@ -158,6 +154,7 @@ export default function Home() {
           },
         });
         const jsonData = response.data;
+
         setData(jsonData);
 
         // Filter the data based on the selected value
@@ -166,7 +163,10 @@ export default function Home() {
         } else {
           setFilteredData(jsonData.filter((e: any) => e.status === value));
         }
-      } catch (error) {
+      } catch (error: any) {
+        if (error.status == 401) {
+          auth.signOut();
+        }
         console.error("Error fetching data:", error);
       }
     };
