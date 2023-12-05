@@ -23,6 +23,7 @@ import {
   ToggleButtonGroup,
   Typography,
   ImageList,
+  CircularProgress,
 } from "@mui/material";
 import {
   Check,
@@ -41,7 +42,7 @@ import { UserAuth } from "@/components/context/AuthContext";
 import { redirect } from "next/navigation";
 import { GoogleAuthProvider, getAuth } from "firebase/auth";
 import { useDispatch, useSelector } from "react-redux";
-import { setData } from "@/redux/actions";
+import { fetchData } from "@/redux/actions/actions";
 
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -116,6 +117,8 @@ export default function Home() {
 
   const auth = getAuth();
 
+  const [loading, setLoading] = useState(state.data.loading);
+
   const dispatch = useDispatch();
 
   const context: any = UserAuth();
@@ -147,27 +150,13 @@ export default function Home() {
   ];
 
   const fetchItemsData = async () => {
+    console.log(state);
     const token = state.user.token;
     const email = state.user.email;
-    console.log("FETCHING");
-    try {
-      const items = await apiInstance.get("/fetch-gmail-data", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          UserId: email,
-        },
-      });
-      dispatch(setData(items.data));
-    } catch (error) {
-      console.log(error);
-      alert("Login token expired");
-      auth.signOut();
-    }
+    dispatch(fetchData({ token: token, email: email }));
   };
 
   useEffect(() => {
-    console.log(state);
-
     if (
       state?.data?.items &&
       state?.data?.items.length > 0 &&
@@ -175,6 +164,8 @@ export default function Home() {
     ) {
       setItemsData(state?.data?.items);
     }
+
+    setLoading(state.data.loading);
   }, [state]);
 
   useEffect(() => {
@@ -185,7 +176,7 @@ export default function Home() {
 
       if (timeDifference < 60000) return;
     }
-    if (itemsData.length < 1) fetchItemsData();
+    // if (itemsData.length < 1) fetchItemsData();
   }, []);
 
   useEffect(() => {
@@ -234,6 +225,22 @@ export default function Home() {
           </IconButton>
         </div>
       </ToggleButtonGroup>
+      {loading && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            flex: "1",
+            margin: "20px",
+          }}
+        >
+          <CircularProgress
+            style={{
+              color: "var(--primary-color)",
+            }}
+          />
+        </div>
+      )}
 
       {filteredData?.length >= 1 ? (
         filteredData.map((item: Item, i) => (

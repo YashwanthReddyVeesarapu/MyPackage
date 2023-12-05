@@ -18,7 +18,7 @@ const montserrat = Montserrat({
 //   description: "Track all your packages in a go...",
 // };
 
-import { store, persistor } from "@/redux/store";
+import { store } from "@/redux/store";
 
 import { auth as firebaseAuth } from "@/lib/firebase/config";
 import MainLayout from "@/layouts/MainLayout";
@@ -26,7 +26,6 @@ import { ThemeProvider } from "@emotion/react";
 import { createTheme } from "@mui/material";
 import { Metadata } from "next";
 import { Provider } from "react-redux";
-import { PersistGate } from "redux-persist/integration/react";
 
 export default function RootLayout({
   children,
@@ -46,11 +45,9 @@ export default function RootLayout({
       <ThemeProvider theme={theme}>
         <body className={montserrat.className}>
           <Provider store={store}>
-            <PersistGate persistor={persistor}>
-              <AuthContextProvider>
-                <MainLayout>{children}</MainLayout>
-              </AuthContextProvider>
-            </PersistGate>
+            <AuthContextProvider>
+              <MainLayout>{children}</MainLayout>
+            </AuthContextProvider>
           </Provider>
         </body>
       </ThemeProvider>

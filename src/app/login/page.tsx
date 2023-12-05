@@ -3,24 +3,17 @@ import MainLayout from "@/layouts/MainLayout";
 import React, { useState } from "react";
 import Input from "@/components/Input";
 import Container from "@/components/Container";
-import {
-  GoogleAuthProvider,
-  getAuth,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-} from "firebase/auth";
+import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { UserAuth } from "../../components/context/AuthContext";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import axios from "axios";
 import { Button } from "@mui/material";
 import { Google } from "@mui/icons-material";
 
 import { apiInstance } from "@/lib/api/apiInstance";
 import { useDispatch } from "react-redux";
 
-import { setData, setUserData } from "@/redux/actions";
+import { fetchData, setUserData } from "@/redux/actions/actions";
 
 type Props = {};
 
@@ -81,9 +74,9 @@ const LoginPage = (props: Props) => {
     if (token && userId) {
       // Call the function to fetch Gmail data with the obtained access token
 
-      const items = await fetchGmailData(token, userId);
+      // const items = await fetchGmailData(token, userId);
 
-      dispatch(setData(items));
+      // dispatch(setData(items));
 
       const userData = {
         uid: result.user.uid,
@@ -92,6 +85,7 @@ const LoginPage = (props: Props) => {
         token: token,
       };
       dispatch(setUserData(userData));
+      dispatch(fetchData({ token: token, email: userId }));
       // const insertUserResponse = await apiInstance.post("/users", userData);
       // console.log(insertUserResponse);
 
