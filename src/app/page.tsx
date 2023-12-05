@@ -301,7 +301,7 @@ export default function Home() {
                 <div className="column">
                   <span>Tracking ID:</span>
                   {item.tracking_number ? (
-                    <a href={item.tracking_link}>{item.tracking_number}</a>
+                    <a target="_blank" href={item.tracking_link}>{item.tracking_number}</a>
                   ) : (
                     "N/A"
                   )}
