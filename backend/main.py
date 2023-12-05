@@ -201,7 +201,7 @@ def extract_package_data(message: dict):
     # call the respective api to get the data
     tracking_link = None
     if carrier_name == "ups":
-        tracking_link = "https://www.ups.com/track?loc=en_US&tracknum={tracking_number}"
+        tracking_link = f"https://www.ups.com/track?loc=en_US&tracknum={tracking_number}"
         image = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/United_Parcel_Service_logo_2014.svg/640px-United_Parcel_Service_logo_2014.svg.png"
     if carrier_name == "fedex":
         tracking_link = f"https://www.fedex.com/fedextrack/?action=track&trackingnumber={tracking_number}"
