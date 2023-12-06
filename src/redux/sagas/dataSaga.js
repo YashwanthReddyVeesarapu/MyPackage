@@ -18,7 +18,14 @@ function* fetchDataSaga(action) {
       .then((res) => res.data);
     yield put({ type: actionTypes.FETCH_DATA_SUCCESS, payload: data });
   } catch (error) {
-    yield put({ type: actionTypes.FETCH_DATA_ERROR, payload: error });
+    console.log(error);
+    if (error.response) {
+      const errordata = {
+        status: error.response.status,
+        message: error.response.data.detail,
+      };
+      yield put({ type: actionTypes.FETCH_DATA_ERROR, payload: errordata });
+    } else yield put({ type: actionTypes.FETCH_DATA_ERROR, payload: error });
   }
 }
 

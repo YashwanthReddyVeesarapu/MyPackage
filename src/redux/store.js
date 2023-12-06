@@ -1,10 +1,12 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { applyMiddleware, configureStore } from "@reduxjs/toolkit";
 import rootReducer from "./reducers/rootReducer";
 import createSagaMiddleware from "redux-saga";
 
 import rootSaga from "./sagas/rootSaga";
 import storage from "redux-persist/lib/storage";
 import { persistReducer, persistStore } from "redux-persist";
+
+import logger from "redux-logger";
 
 // export const store = configureStore({ reducer: rootReducer });
 
@@ -20,7 +22,7 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(sagaMiddleware),
+    getDefaultMiddleware().concat(sagaMiddleware, logger),
   // middleware: (getDefaultMiddleware) =>
   //   getDefaultMiddleware({
   //     serializableCheck: {

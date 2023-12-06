@@ -13,7 +13,7 @@ import { Google } from "@mui/icons-material";
 import { apiInstance } from "@/lib/api/apiInstance";
 import { useDispatch } from "react-redux";
 
-import { fetchData, setUserData } from "@/redux/actions/actions";
+import { fetchData, fetchUserData } from "@/redux/actions/actions";
 
 type Props = {};
 
@@ -34,27 +34,27 @@ const LoginPage = (props: Props) => {
 
   if (context.user) return redirect("/profile");
 
-  const fetchGmailData = async (accessToken: string, userId: string) => {
-    try {
-      // Specify the Gmail API endpoint for the user's messages
-      // const apiUrl = `https://gmail.googleapis.com/gmail/v1/users/${userId}/messages`;
+  // const fetchGmailData = async (accessToken: string, userId: string) => {
+  //   try {
+  //     // Specify the Gmail API endpoint for the user's messages
+  //     // const apiUrl = `https://gmail.googleapis.com/gmail/v1/users/${userId}/messages`;
 
-      const apiUrl = `http://127.0.0.1:8000/fetch-gmail-data`;
-      // Make a GET request to the Gmail API with the access token
-      const response = await apiInstance.get("/fetch-gmail-data", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          UserId: userId,
-        },
-      });
+  //     const apiUrl = `http://127.0.0.1:8000/fetch-gmail-data`;
+  //     // Make a GET request to the Gmail API with the access token
+  //     const response = await apiInstance.get("/fetch-gmail-data", {
+  //       headers: {
+  //         Authorization: `Bearer ${accessToken}`,
+  //         UserId: userId,
+  //       },
+  //     });
 
-      return response.data;
-      // You can handle and display the data as needed
-    } catch (error) {
-      console.error("Error fetching Gmail data:", error);
-      alert("Something went wrong while fetching data");
-    }
-  };
+  //     return response.data;
+  //     // You can handle and display the data as needed
+  //   } catch (error) {
+  //     console.error("Error fetching Gmail data:", error);
+  //     alert("Something went wrong while fetching data");
+  //   }
+  // };
 
   const handleSocial = async () => {
     const provider = new GoogleAuthProvider();
@@ -66,10 +66,7 @@ const LoginPage = (props: Props) => {
 
     //Access toke to fetch gmail data
     const token: any = credential?.accessToken;
-
     const userId = result.user.email;
-
-    context.setAccess(token);
 
     if (token && userId) {
       // Call the function to fetch Gmail data with the obtained access token
@@ -77,14 +74,14 @@ const LoginPage = (props: Props) => {
       // const items = await fetchGmailData(token, userId);
 
       // dispatch(setData(items));
-
-      const userData = {
-        uid: result.user.uid,
-        displayName: result.user.displayName,
-        email: result.user.email,
-        token: token,
-      };
-      dispatch(setUserData(userData));
+      dispatch(
+        fetchUserData({
+          uid: result.user.uid,
+          displayName: result.user.displayName,
+          email: result.user.email,
+          token: token,
+        })
+      );
       dispatch(fetchData({ token: token, email: userId }));
       // const insertUserResponse = await apiInstance.post("/users", userData);
       // console.log(insertUserResponse);

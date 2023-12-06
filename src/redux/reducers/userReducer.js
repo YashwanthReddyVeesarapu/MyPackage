@@ -6,12 +6,17 @@ const initialState = {
   last_modified: null,
 };
 
+import * as actionTypes from "./../actions/actionTypes";
+
 const userReducer = (state = initialState, action) => {
   const { type, payload } = action;
 
   switch (type) {
-    case "FETCH_USER_DATA":
-      return payload;
+    case actionTypes.FETCH_USER_DATA:
+      return { ...state, ...action.payload };
+
+    case actionTypes.LOGOUT_USER:
+      return initialState;
 
     default:
       return state;

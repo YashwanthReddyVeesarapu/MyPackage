@@ -30,6 +30,7 @@ import {
   ExpandMore,
   LocalShipping,
   RefreshOutlined,
+  Visibility,
 } from "@mui/icons-material";
 
 import StepConnector, {
@@ -307,18 +308,18 @@ export default function Home() {
               <div className="container">
                 <div className="column">
                   <span>Tracking ID:</span>
-                  {item.tracking_number ? (
+                  {item.tracking_number && item.tracking_number !== "--" ? (
                     <a
                       target="_blank"
                       rel="noreferrer noopener"
                       href={item.tracking_link}
                     >
-                      {item.tracking_number}
+                      {item.tracking_number} <Visibility />
                     </a>
                   ) : (
-                    "N/A"
+                    "--"
                   )}
-                  <span>Last updated:</span>{" "}
+                  <span>Last updated:</span>
                   {item.last_modified ? item.last_modified : "N/A"}
                 </div>
                 <div className="column">

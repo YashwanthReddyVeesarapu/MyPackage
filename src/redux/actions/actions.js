@@ -15,7 +15,16 @@ export const fetchDataError = (error) => ({
   type: actionTypes.FETCH_DATA_ERROR,
   payload: error,
 });
-export const setUserData = (userData) => ({
-  type: "FETCH_USER_DATA",
-  payload: userData,
+
+export const clearData = () => ({
+  type: actionTypes.CLEAR_DATA,
+});
+
+export const fetchUserData = (payload) => ({
+  type: actionTypes.FETCH_USER_DATA,
+  payload: payload,
+});
+
+export const logoutUser = () => ({
+  type: actionTypes.LOGOUT_USER,
 });

@@ -26,6 +26,9 @@ const dataReducer = (state = initialState, action) => {
         error: payload,
       };
 
+    case actionTypes.CLEAR_DATA:
+      return initialState;
+
     default:
       return state;
   }
