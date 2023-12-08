@@ -19,6 +19,12 @@ const dataReducer = (state = initialState, action) => {
         items: payload,
         loading: false,
       };
+    case actionTypes.FETCH_DATA_CACHE_SUCCESS:
+      return {
+        ...state,
+        items: payload,
+        loading: true,
+      };
     case actionTypes.FETCH_DATA_ERROR:
       return {
         ...state,

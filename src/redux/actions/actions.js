@@ -11,6 +11,11 @@ export const fetchDataSuccess = (items) => ({
   payload: items,
 });
 
+export const fetchDataCacheSuccess = (items) => ({
+  type: actionTypes.FETCH_DATA_CACHE_SUCCESS,
+  payload: items,
+});
+
 export const fetchDataError = (error) => ({
   type: actionTypes.FETCH_DATA_ERROR,
   payload: error,

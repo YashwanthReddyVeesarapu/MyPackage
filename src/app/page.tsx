@@ -158,6 +158,7 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (state?.data?.error?.status == 401) window.location.href = "/logout";
     if (
       state?.data?.items &&
       state?.data?.items.length > 0 &&

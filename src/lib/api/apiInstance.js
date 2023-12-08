@@ -1,6 +1,6 @@
 import axios from "axios";
 
-let dev = false;
+let dev = true;
 let url = "https://mypackage-789471c5eba8.herokuapp.com/";
 
 if (dev) {

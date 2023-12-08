@@ -4,7 +4,8 @@ from pydantic import BaseModel
 import re
 from typing import Dict, List
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Depends, HTTPException, Header, status
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, Header
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 import requests
 import base64
@@ -27,6 +28,7 @@ remote_mongodb_uri = "mongodb+srv://yash:1234@mypackagecluster.0vtwzrh.mongodb.n
 client = MongoClient(remote_mongodb_uri)
 db = client["MyPackage"]
 usersCollection = db["users"]
+itemsCollection = db["items"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,9 +39,9 @@ app.add_middleware(
 )
 
 
-def get_message_content(message_id, UserId, token):
+def get_message_content(message_id, email, token):
     api_url = (
-        f"https://gmail.googleapis.com/gmail/v1/users/{UserId}/messages/{message_id}"
+        f"https://gmail.googleapis.com/gmail/v1/users/{email}/messages/{message_id}"
     )
     headers = {"Authorization": f"Bearer {token}"}
 
@@ -94,7 +96,7 @@ def classify_messages(messages: List[Dict]) -> List[Dict]:
     classified_messages = []
 
     for message in messages:
-        if "SENT" not in message["labelIds"]:
+        # if "SENT" not in message["labelIds"]:
             try:
                 message_body = get_message_body(message)
                 # Placeholder for a hypothetical machine learning model
@@ -118,6 +120,9 @@ def process_and_store_packages(UserId: str, classified_messages: List[dict]):
             # Store the package data in your database
             store_package_data(UserId, package_data)
 
+            for pkg in processed_packages:
+                if pkg["tracking_number"] == package_data["tracking_number"]:
+                    raise Exception("Duplicate tracking found")
             processed_packages.append(package_data)
         except Exception as e:
             print(e)
@@ -207,6 +212,7 @@ def extract_package_data(message: dict):
     # Extract relevant information from the classified message
     # call the respective api to get the data
     tracking_link = None
+    image = ""
     if carrier_name == "ups":
         tracking_link = f"https://www.ups.com/track?loc=en_US&tracknum={tracking_number}"
         image = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/United_Parcel_Service_logo_2014.svg/640px-United_Parcel_Service_logo_2014.svg.png"
@@ -220,17 +226,20 @@ def extract_package_data(message: dict):
     package_data = {
         "_id": tracking_number,
         "company_name": sender,
-        "status": status if status else "--",
-        "last_location": "--",
-        "last_modified": "--",
-        "tracking_number": tracking_number if tracking_number else "--",
+        "status": status if status else "",
+        "last_location": "",
+        "last_modified": "",
+        "tracking_number": tracking_number if tracking_number else "",
         "image": image if image else "",
-        "carrier": carrier_name if carrier_name else "--",
+        "carrier": carrier_name if carrier_name else "",
+        "messageId": message["id"],
+        "internalDate": message["internalDate"],
         "tracking_link": tracking_link
         if tracking_link
-        else "--",  # You can extract this if needed
+        else "",  # You can extract this if needed
     }
-    return package_data
+    if package_data["tracking_number"]: return package_data
+    else: raise Exception("No tracking number")
 
 
 def store_package_data(UserId: str, package_data: dict):
@@ -238,27 +247,49 @@ def store_package_data(UserId: str, package_data: dict):
     return package_data
 
 
+def process_emails(message_ids, email, token):
+        # Fetch the content of each message
+    messages = [
+        get_message_content(message_id, email, token) for message_id in message_ids
+    ]
+    # Classify messages using your machine learning model
+    classified_messages = classify_messages(messages)
+
+    # Process and store the classified messages
+    processed_packages = process_and_store_packages(email, classified_messages)
+
+    #check existing_email
+    unique_email_identifier = itemsCollection.find_one({"_id": email})
+
+
+    if unique_email_identifier == None:
+        final_obj = {"_id": email, "items": processed_packages, "last_modified": datetime.now(), "status": "fetched"}
+        insertInfo = itemsCollection.insert_one(final_obj)
+    else:
+        #avoid duplicate message Ids  
+        updateInfo = itemsCollection.update_one({"_id": email},{"$set": { "last_modified": datetime.now(), "status": "fetched"}, "$push": {"items": {"$each": processed_packages}}})
+    return processed_packages
+
+
 @app.get("/fetch-gmail-data")
 def fetch_gmail_data(
+    tasks: BackgroundTasks,
     token: str = Depends(oauth2_scheme),
-    UserId: str = Header(..., description="User ID for Gmail API"),
+    email: str = Header(..., description="User ID for Gmail API"),
 ):
- 
+    
 
 
-    # Calculate the date 15 days ago from today
+        # Calculate the date 15 days ago from today
     start_date = (datetime.utcnow() - timedelta(days=15)).strftime('%Y/%m/%d')
     # Construct the query parameter for messages after the start date
     query_param = f"in:inbox after:{start_date}"
-
-
 
     # Implement Gmail API integration here
     # This requires authentication and proper API calls.
     # Return the Gmail data as JSON.
     # api_url = f"https://gmail.googleapis.com/gmail/v1/users/{UserId}/messages"
-    api_url = f"https://gmail.googleapis.com/gmail/v1/users/{UserId}/messages?maxResults=100&q={query_param}"
-
+    api_url = f"https://gmail.googleapis.com/gmail/v1/users/{email}/messages?maxResults=500&q={query_param}"
     headers = {"Authorization": f"Bearer {token}"}
 
         # call the api_url
@@ -270,20 +301,42 @@ def fetch_gmail_data(
     # Check for errors in the initial call
     result.raise_for_status()
 
+    messages = result.json()
     # Get the list of message IDs
-    message_ids = [message["id"] for message in result.json().get("messages", [])]
+    message_ids = [message["id"] for message in messages.get("messages", [])]
+    
+    messageDetail = "Base call made"
+    
+    unique_email_identifier = itemsCollection.find_one({"_id": email})
 
-    # Fetch the content of each message
-    messages = [
-        get_message_content(message_id, UserId, token) for message_id in message_ids
-    ]
-    # Classify messages using your machine learning model
-    classified_messages = classify_messages(messages)
+    if unique_email_identifier == None:
+        final_obj = {"_id": email, "items": [], "last_modified": datetime.now(), "status": "processing"}
+        insertInfo = itemsCollection.insert_one(final_obj)
+        messageDetail= "First ever call made"
+        tasks.add_task(process_emails,message_ids=message_ids, email=email, token=token)
+        return JSONResponse(status_code=202,content={"message":messageDetail})
+    elif unique_email_identifier["status"] == "processing":
+        messageDetail = "Processing in Background, Waiting..."
+        return JSONResponse(status_code=202, content=messageDetail)
+    elif unique_email_identifier["status"] == "fetched":
+        lm = unique_email_identifier["last_modified"]
+        time_difference = datetime.now() - lm
+        status_code=200
+        if time_difference > timedelta(minutes=5):
+            status_code=201
+            c_start_date = (lm - timedelta(days=1)).strftime('%Y/%m/%d')
+            c_query_param = f"in:inbox after:{c_start_date}"
+            c_api_url = f"https://gmail.googleapis.com/gmail/v1/users/{email}/messages?maxResults=500&q={c_query_param}"
+            headers = {"Authorization": f"Bearer {token}"}
+            result = requests.get(c_api_url, headers=headers)
+            c_messages = result.json()
+            c_message_ids = [message["id"] for message in c_messages.get("messages", [])]
+            tasks.add_task(process_emails,message_ids=c_message_ids, email=email, token=token)
+            updateInfo = itemsCollection.update_one({"_id": email}, {"$set": {"status": "processing"}})
+        return JSONResponse (status_code=status_code,content= {"items": unique_email_identifier["items"]})
+    raise HTTPException(status_code=500, detail="Something went wtong")
 
-    # Process and store the classified messages
-    processed_packages = process_and_store_packages(UserId, classified_messages)
 
-    return processed_packages
 
 
 def check_existing_user(email):
@@ -298,6 +351,9 @@ class User(BaseModel):
     displayName: str = None
     token: str
     uid: str
+
+
+
 
 
 # Uncomment and modify as needed

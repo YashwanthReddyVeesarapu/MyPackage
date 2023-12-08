@@ -66,9 +66,9 @@ const LoginPage = (props: Props) => {
 
     //Access toke to fetch gmail data
     const token: any = credential?.accessToken;
-    const userId = result.user.email;
+    const email = result.user.email;
 
-    if (token && userId) {
+    if (token && email) {
       // Call the function to fetch Gmail data with the obtained access token
 
       // const items = await fetchGmailData(token, userId);
@@ -82,7 +82,7 @@ const LoginPage = (props: Props) => {
           token: token,
         })
       );
-      dispatch(fetchData({ token: token, email: userId }));
+      dispatch(fetchData({ token: token, email: email }));
       // const insertUserResponse = await apiInstance.post("/users", userData);
       // console.log(insertUserResponse);
 
