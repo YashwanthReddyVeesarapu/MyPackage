@@ -15,6 +15,8 @@ from datetime import datetime, timedelta
 
 app = FastAPI()
 
+running = []
+
 
 # CORS middleware configuration
 origins = ["http://localhost", "http://localhost:3000", "https://mypackage.redsols.us"]
@@ -261,13 +263,14 @@ def process_emails(message_ids, email, token):
     #check existing_email
     unique_email_identifier = itemsCollection.find_one({"_id": email})
 
+    running.remove(email)
 
     if unique_email_identifier == None:
-        final_obj = {"_id": email, "items": processed_packages, "last_modified": datetime.now(), "status": "fetched"}
+        final_obj = {"_id": email, "items": processed_packages, "last_modified": datetime.now()}
         insertInfo = itemsCollection.insert_one(final_obj)
     else:
         #avoid duplicate message Ids  
-        updateInfo = itemsCollection.update_one({"_id": email},{"$set": { "last_modified": datetime.now(), "status": "fetched"}, "$push": {"items": {"$each": processed_packages}}})
+        updateInfo = itemsCollection.update_one({"_id": email},{"$set": { "last_modified": datetime.now()}, "$push": {"items": {"$each": processed_packages}}})
     return processed_packages
 
 
@@ -310,15 +313,14 @@ def fetch_gmail_data(
     unique_email_identifier = itemsCollection.find_one({"_id": email})
 
     if unique_email_identifier == None:
-        final_obj = {"_id": email, "items": [], "last_modified": datetime.now(), "status": "processing"}
-        insertInfo = itemsCollection.insert_one(final_obj)
+        running.append(email)
         messageDetail= "First ever call made"
         tasks.add_task(process_emails,message_ids=message_ids, email=email, token=token)
         return JSONResponse(status_code=202,content={"message":messageDetail})
-    elif unique_email_identifier["status"] == "processing":
+    elif email in running:
         messageDetail = "Processing in Background, Waiting..."
         return JSONResponse(status_code=202, content=messageDetail)
-    elif unique_email_identifier["status"] == "fetched":
+    else:
         lm = unique_email_identifier["last_modified"]
         time_difference = datetime.now() - lm
         status_code=200
@@ -332,9 +334,9 @@ def fetch_gmail_data(
             c_messages = result.json()
             c_message_ids = [message["id"] for message in c_messages.get("messages", [])]
             tasks.add_task(process_emails,message_ids=c_message_ids, email=email, token=token)
-            updateInfo = itemsCollection.update_one({"_id": email}, {"$set": {"status": "processing"}})
+            running.append(email)
+            # updateInfo = itemsCollection.update_one({"_id": email}, {"$set": {"status": "processing"}})
         return JSONResponse (status_code=status_code,content= {"items": unique_email_identifier["items"]})
-    raise HTTPException(status_code=500, detail="Something went wtong")
 
 
 
