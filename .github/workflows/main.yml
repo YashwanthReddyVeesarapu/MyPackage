@@ -27,7 +27,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    needs: build
+    needs: out
 
     steps:
       - name: Checkout code
