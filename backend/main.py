@@ -83,6 +83,11 @@ def has_tracking_info(message: dict) -> bool:
         r"\btracking\b",
         r"\btracking number\b",
         r"\btracking info\b",
+        r"\btracknum=(\w+)\b",
+        r"\btrknbr=(\w+)\b",
+        r"\btrackingnumber=(\w+)\b",
+        r"\btracknumbers=(\w+)\b",
+        r"\btracking_numbers=(\w+)\b",
         # Add more patterns as needed
     ]
 
@@ -99,16 +104,16 @@ def classify_messages(messages: List[Dict]) -> List[Dict]:
 
     for message in messages:
         # if "SENT" not in message["labelIds"]:
-            try:
-                message_body = get_message_body(message)
-                # Placeholder for a hypothetical machine learning model
-                has_tracking = has_tracking_info(message_body)
+        try:
+            message_body = get_message_body(message)
+            # Placeholder for a hypothetical machine learning model
+            has_tracking = has_tracking_info(message_body)
 
-                if has_tracking:
-                    classified_messages.append(message)
-            except Exception as e:
-                print(e)
-                continue
+            if has_tracking:
+                classified_messages.append(message)
+        except Exception as e:
+            print(e)
+            continue
     return classified_messages
 
 
@@ -150,8 +155,8 @@ def extract_package_data(message: dict):
     message_body = get_message_body(message)
 
     sender = get_sender(message)
-    lpt = sender.split('@',1)
-    subdomains = lpt[-1].split('.')
+    lpt = sender.split("@", 1)
+    subdomains = lpt[-1].split(".")
     # Extract the top-level domain (TLD)
     tld = subdomains[-2]
     sender = tld.upper()
@@ -216,7 +221,9 @@ def extract_package_data(message: dict):
     tracking_link = None
     image = ""
     if carrier_name == "ups":
-        tracking_link = f"https://www.ups.com/track?loc=en_US&tracknum={tracking_number}"
+        tracking_link = (
+            f"https://www.ups.com/track?loc=en_US&tracknum={tracking_number}"
+        )
         image = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/United_Parcel_Service_logo_2014.svg/640px-United_Parcel_Service_logo_2014.svg.png"
     if carrier_name == "fedex":
         tracking_link = f"https://www.fedex.com/fedextrack/?action=track&trackingnumber={tracking_number}"
@@ -240,8 +247,10 @@ def extract_package_data(message: dict):
         if tracking_link
         else "",  # You can extract this if needed
     }
-    if package_data["tracking_number"]: return package_data
-    else: raise Exception("No tracking number")
+    if package_data["tracking_number"]:
+        return package_data
+    else:
+        raise Exception("No tracking number")
 
 
 def store_package_data(UserId: str, package_data: dict):
@@ -250,7 +259,7 @@ def store_package_data(UserId: str, package_data: dict):
 
 
 def process_emails(message_ids, email, token):
-        # Fetch the content of each message
+    # Fetch the content of each message
     messages = [
         get_message_content(message_id, email, token) for message_id in message_ids
     ]
@@ -260,17 +269,27 @@ def process_emails(message_ids, email, token):
     # Process and store the classified messages
     processed_packages = process_and_store_packages(email, classified_messages)
 
-    #check existing_email
+    # check existing_email
     unique_email_identifier = itemsCollection.find_one({"_id": email})
 
     running.remove(email)
 
     if unique_email_identifier == None:
-        final_obj = {"_id": email, "items": processed_packages, "last_modified": datetime.now()}
+        final_obj = {
+            "_id": email,
+            "items": processed_packages,
+            "last_modified": datetime.now(),
+        }
         insertInfo = itemsCollection.insert_one(final_obj)
     else:
-        #avoid duplicate message Ids  
-        updateInfo = itemsCollection.update_one({"_id": email},{"$set": { "last_modified": datetime.now()}, "$push": {"items": {"$each": processed_packages}}})
+        # avoid duplicate message Ids
+        updateInfo = itemsCollection.update_one(
+            {"_id": email},
+            {
+                "$set": {"last_modified": datetime.now()},
+                "$push": {"items": {"$each": processed_packages}},
+            },
+        )
     return processed_packages
 
 
@@ -280,11 +299,8 @@ def fetch_gmail_data(
     token: str = Depends(oauth2_scheme),
     email: str = Header(..., description="User ID for Gmail API"),
 ):
-    
-
-
-        # Calculate the date 15 days ago from today
-    start_date = (datetime.utcnow() - timedelta(days=15)).strftime('%Y/%m/%d')
+    # Calculate the date 15 days ago from today
+    start_date = (datetime.utcnow() - timedelta(days=15)).strftime("%Y/%m/%d")
     # Construct the query parameter for messages after the start date
     query_param = f"in:inbox after:{start_date}"
 
@@ -295,7 +311,7 @@ def fetch_gmail_data(
     api_url = f"https://gmail.googleapis.com/gmail/v1/users/{email}/messages?maxResults=500&q={query_param}"
     headers = {"Authorization": f"Bearer {token}"}
 
-        # call the api_url
+    # call the api_url
     result = requests.get(api_url, headers=headers)
 
     if result.status_code == 401:
@@ -307,38 +323,44 @@ def fetch_gmail_data(
     messages = result.json()
     # Get the list of message IDs
     message_ids = [message["id"] for message in messages.get("messages", [])]
-    
+
     messageDetail = "Base call made"
-    
+
     unique_email_identifier = itemsCollection.find_one({"_id": email})
 
     if unique_email_identifier == None:
         running.append(email)
-        messageDetail= "First ever call made"
-        tasks.add_task(process_emails,message_ids=message_ids, email=email, token=token)
-        return JSONResponse(status_code=202,content={"message":messageDetail})
+        messageDetail = "First ever call made"
+        tasks.add_task(
+            process_emails, message_ids=message_ids, email=email, token=token
+        )
+        return JSONResponse(status_code=202, content={"message": messageDetail})
     elif email in running:
         messageDetail = "Processing in Background, Waiting..."
         return JSONResponse(status_code=202, content=messageDetail)
     else:
         lm = unique_email_identifier["last_modified"]
         time_difference = datetime.now() - lm
-        status_code=200
+        status_code = 200
         if time_difference > timedelta(minutes=5):
-            status_code=201
-            c_start_date = (lm - timedelta(days=1)).strftime('%Y/%m/%d')
+            status_code = 201
+            c_start_date = (lm - timedelta(days=1)).strftime("%Y/%m/%d")
             c_query_param = f"in:inbox after:{c_start_date}"
             c_api_url = f"https://gmail.googleapis.com/gmail/v1/users/{email}/messages?maxResults=500&q={c_query_param}"
             headers = {"Authorization": f"Bearer {token}"}
             result = requests.get(c_api_url, headers=headers)
             c_messages = result.json()
-            c_message_ids = [message["id"] for message in c_messages.get("messages", [])]
-            tasks.add_task(process_emails,message_ids=c_message_ids, email=email, token=token)
+            c_message_ids = [
+                message["id"] for message in c_messages.get("messages", [])
+            ]
+            tasks.add_task(
+                process_emails, message_ids=c_message_ids, email=email, token=token
+            )
             running.append(email)
             # updateInfo = itemsCollection.update_one({"_id": email}, {"$set": {"status": "processing"}})
-        return JSONResponse (status_code=status_code,content= {"items": unique_email_identifier["items"]})
-
-
+        return JSONResponse(
+            status_code=status_code, content={"items": unique_email_identifier["items"]}
+        )
 
 
 def check_existing_user(email):
@@ -353,9 +375,6 @@ class User(BaseModel):
     displayName: str = None
     token: str
     uid: str
-
-
-
 
 
 # Uncomment and modify as needed
