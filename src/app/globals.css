@@ -8,6 +8,7 @@
   --background-end-rgb: 255, 255, 255;
   --header-height: 60px;
   --footer-height: 50px;
+  --primaray-color: #784af4;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -16,6 +17,7 @@
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
     --primaray-color: #784af4;
+    --base-color: #fff;
   }
 }
 
@@ -41,10 +43,10 @@ main {
 }
 
 body a {
-  color: white;
   text-decoration: none;
   margin: 10px;
   font-size: 1.2em;
+  color: rgb(var(--foreground-rgb));
 }
 
 body a:hover {
@@ -67,7 +69,7 @@ body a:hover {
   height: 64px;
   margin: 8px;
   border-radius: 50%;
-  background: #fff;
+  background: rgb(var(--foreground-rgb));
   animation: lds-circle 3s cubic-bezier(0, 0.2, 0.8, 1) infinite;
 }
 
