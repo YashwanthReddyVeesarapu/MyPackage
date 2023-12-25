@@ -9,9 +9,9 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 import requests
 import base64
-from bson import ObjectId
 from datetime import datetime, timedelta
 
+import os
 
 app = FastAPI()
 
@@ -25,7 +25,7 @@ origins = ["http://localhost", "http://localhost:3000", "https://mypackage.redso
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-remote_mongodb_uri = "mongodb+srv://yash:1234@mypackagecluster.0vtwzrh.mongodb.net/?retryWrites=true&w=majority"
+remote_mongodb_uri = os.environ.get("DB_URL")
 
 client = MongoClient(remote_mongodb_uri)
 db = client["MyPackage"]
@@ -269,25 +269,45 @@ def process_emails(message_ids, email, token):
     # Process and store the classified messages
     processed_packages = process_and_store_packages(email, classified_messages)
 
+    running.remove(email)
+
     # check existing_email
     unique_email_identifier = itemsCollection.find_one({"_id": email})
 
-    running.remove(email)
+    pre_items = unique_email_identifier["items"]
 
-    if unique_email_identifier == None:
-        final_obj = {
-            "_id": email,
-            "items": processed_packages,
-            "last_modified": datetime.now(),
-        }
-        insertInfo = itemsCollection.insert_one(final_obj)
-    else:
-        # avoid duplicate message Ids
-        updateInfo = itemsCollection.update_one(
+
+    joined_array = processed_packages + pre_items
+
+    # Create a set to store unique tracking numbers
+    unique_tracking_numbers = set()
+
+    # Create a list to store unique objects
+    result_array = []
+
+    # Iterate through the array
+    for obj in joined_array:
+    # Ensure the dictionary has the key "tracking_number"
+        if "tracking_number" in obj:
+            tracking_number = obj["tracking_number"]
+        # Check if the tracking number is not in the set (i.e., not encountered before)
+            if tracking_number not in unique_tracking_numbers:
+                unique_tracking_numbers.add(tracking_number)
+                result_array.append(obj)
+
+    # if unique_email_identifier == None:
+    #     final_obj = {
+    #         "_id": email,
+    #         "items": processed_packages,
+    #         "last_modified": datetime.now(),
+    #     }
+    #     insertInfo = itemsCollection.insert_one(final_obj)
+    # else:
+    # avoid duplicate message Ids
+    updateInfo = itemsCollection.update_one(
             {"_id": email},
             {
-                "$set": {"last_modified": datetime.now()},
-                "$push": {"items": {"$each": processed_packages}},
+                "$set": {"last_modified": datetime.now(), "items": result_array},
             },
         )
     return processed_packages
@@ -320,6 +340,10 @@ def fetch_gmail_data(
     # Check for errors in the initial call
     result.raise_for_status()
 
+    if email in running:
+        messageDetail = "Processing in Background, Waiting..."
+        return JSONResponse(status_code=202, content=messageDetail)
+
     messages = result.json()
     # Get the list of message IDs
     message_ids = [message["id"] for message in messages.get("messages", [])]
@@ -328,6 +352,7 @@ def fetch_gmail_data(
 
     unique_email_identifier = itemsCollection.find_one({"_id": email})
 
+
     if unique_email_identifier == None:
         running.append(email)
         messageDetail = "First ever call made"
@@ -335,9 +360,7 @@ def fetch_gmail_data(
             process_emails, message_ids=message_ids, email=email, token=token
         )
         return JSONResponse(status_code=202, content={"message": messageDetail})
-    elif email in running:
-        messageDetail = "Processing in Background, Waiting..."
-        return JSONResponse(status_code=202, content=messageDetail)
+
     else:
         lm = unique_email_identifier["last_modified"]
         time_difference = datetime.now() - lm
@@ -357,7 +380,6 @@ def fetch_gmail_data(
                 process_emails, message_ids=c_message_ids, email=email, token=token
             )
             running.append(email)
-            # updateInfo = itemsCollection.update_one({"_id": email}, {"$set": {"status": "processing"}})
         return JSONResponse(
             status_code=status_code, content={"items": unique_email_identifier["items"]}
         )

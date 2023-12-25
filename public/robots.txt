@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://mypackage.redsols.us/sitemap.xml

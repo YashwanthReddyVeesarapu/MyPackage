@@ -7,11 +7,12 @@ export default function Footer(props: Props) {
   return (
     <footer>
       <div className="f-col">
-        <Link href={"/"}>Track Packages</Link>
         <Link href={"/about"}>About</Link>
         <Link href={"/chat"}>Chat</Link>
         <Link href={"/contact"}>Contact us</Link>
         <Link href={"/disclaimer"}>Disclaimer</Link>
+        <Link href={"/terms"}>Terms of service</Link>
+        <Link href={"/privacy"}>Privacy policy</Link>
       </div>
     </footer>
   );
