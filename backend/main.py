@@ -62,13 +62,10 @@ def get_message_body(message):
                 return body_text
     else:
         body_data = message["payload"]["body"]["data"]
-
         # Decode the base64-encoded data
         decoded_data = base64.urlsafe_b64decode(body_data.encode("UTF-8"))
-
         # Convert the bytes to a string
         message_body = decoded_data.decode("UTF-8")
-
         return message_body
     return None
 
@@ -88,6 +85,9 @@ def has_tracking_info(message: dict) -> bool:
         r"\btrackingnumber=(\w+)\b",
         r"\btracknumbers=(\w+)\b",
         r"\btracking_numbers=(\w+)\b",
+        r'\b(1Z[0-9A-Z]{16})\b',
+        r'\b((96|98)[0-9]{20})\b',
+        r'\b(94\d{20}|\d{30}|\d{20})\b'
         # Add more patterns as needed
     ]
 
@@ -124,9 +124,6 @@ def process_and_store_packages(UserId: str, classified_messages: List[dict]):
         try:
             package_data = extract_package_data(message)
 
-            # Store the package data in your database
-            store_package_data(UserId, package_data)
-
             for pkg in processed_packages:
                 if pkg["tracking_number"] == package_data["tracking_number"]:
                     raise Exception("Duplicate tracking found")
@@ -153,85 +150,110 @@ def get_recipient(message_obj):
 
 def extract_package_data(message: dict):
     message_body = get_message_body(message)
-
     sender = get_sender(message)
     lpt = sender.split("@", 1)
     subdomains = lpt[-1].split(".")
     # Extract the top-level domain (TLD)
     tld = subdomains[-2]
     sender = tld.upper()
-    recipient = get_recipient(message)
+    # recipient = get_recipient(message)
 
-    tracking_patterns = [
-        r"\btracknum=(\w+)\b",
-        r"\btrknbr=(\w+)\b",
-        r"\btrackingnumber=(\w+)\b",
-        r"\btracknumbers=(\w+)\b",
-        r"\btracking_numbers=(\w+)\b",
-        # Add more patterns as needed
-    ]
-
+    # tracking_patterns = [
+    #     r"\btracknum=(\w+)\b",
+    #     r"\btrknbr=(\w+)\b",
+    #     r"\btrackingnumber=(\w+)\b",
+    #     r"\btracknumbers=(\w+)\b",
+    #     r"\btracking_numbers=(\w+)\b",
+    #     # Add more patterns as needed
+    # ]
     tracking_number = None
-    # Check if any of the patterns match the email text
-    for index, pattern in enumerate(tracking_patterns):
-        match = re.search(pattern, message_body, re.IGNORECASE)
-        if match:
-            tracking_number = (message_body[match.start() : match.end()]).split("=")[1]
-            break
+    # # Check if any of the patterns match the email text
+    # for index, pattern in enumerate(tracking_patterns):
+    #     match = re.search(pattern, message_body, re.IGNORECASE)
+    #     if match:
+    #         tracking_number = (message_body[match.start() : match.end()]).split("=")[1]
+    #         print(tracking_number)
+    #         break
 
     carrier_patterns = [
-        r"\bUPS\b",
-        r"\bUSPS\b",
-        r"\bFedex\b",
-        # Add more patterns as needed
+        r'\b(1Z[0-9A-Z]{16})\b',
+        r'\b((96|98)[0-9]{20})\b',
+        r'\b(94\d{20}|\d{30}|\d{20})\b'
     ]
+    # carrier_patterns = [
+    #     r"\bUPS\b",
+    #     r"\bUSPS\b",
+    #     r"\bFedex\b",
+    #     # Add more patterns as needed
+    # ]
     carrier_name = None
     # Check if any of the patterns match the email text
     for index, pattern in enumerate(carrier_patterns):
         match = re.search(pattern, message_body, re.IGNORECASE)
+        ups_regex = re.compile(r'\b(1Z[0-9A-Z]{16})\b', re.IGNORECASE)
+        fedex_regex = re.compile(r'\b((96|98)[0-9]{20})\b', re.IGNORECASE)
+        usps_regex = re.compile(r'\b(94\d{20}|\d{30}|\d{20})\b', re.IGNORECASE)
         if match:
-            carrier_name = (message_body[match.start() : match.end()]).lower()
+            if pattern == carrier_patterns[0]:
+                carrier_name = "UPS"
+                tracking_number = ups_regex.findall(message_body)[0]
+            elif pattern == carrier_patterns[1]:
+                carrier_name = "FedEx"
+                tracking_number = fedex_regex.findall(message_body)[0]
+            elif pattern == carrier_patterns[2]:
+                carrier_name = "USPS"
+                tracking_number = usps_regex.findall(message_body)[0]
             break
+                
+        # if match:
+        #     carrier_name = (message_body[match.start() : match.end()]).lower()
+        #     break
 
     status_patterns = [
         r"\bdelivered\b",
         r"\btransit\b",
         r"\barriving\b",
         r"\bdelivery\b",
+        r"\bready\b"
         # Add more patterns as needed
     ]
     status = None
     # Check if any of the patterns match the email text
-    for index, pattern in enumerate(status_patterns):
-        match = re.search(pattern, message_body, re.IGNORECASE)
-        if match:
-            status = (
-                "Delivered"
-                if index == 0
-                else "In Transit"
-                if index == 1 or index == 3
-                else "Out for delivery"
-                if index == 2
-                else "Waiting for details"
-            )
-            break
+    if tracking_number:
+        for index, pattern in enumerate(status_patterns):
+            match = re.search(pattern, message_body, re.IGNORECASE)
+            if match:
+                status = (
+                    "Waiting for details"
+                    if index == 4 or index == 2
+                    else "Delivered"
+                    if index == 0
+                    else "In Transit"
+                    if index == 1 or index == 3
+                    else "Out for delivery"
+                )
+                break
+    else:
+        raise Exception("No tracking number")
+
 
     # Extract relevant information from the classified message
     # call the respective api to get the data
     tracking_link = None
-    image = ""
-    if carrier_name == "ups":
-        tracking_link = (
-            f"https://www.ups.com/track?loc=en_US&tracknum={tracking_number}"
-        )
-        image = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/United_Parcel_Service_logo_2014.svg/640px-United_Parcel_Service_logo_2014.svg.png"
-    if carrier_name == "fedex":
-        tracking_link = f"https://www.fedex.com/fedextrack/?action=track&trackingnumber={tracking_number}"
-        image = "https://1000logos.net/wp-content/uploads/2021/04/Fedex-logo.png"
-    if carrier_name == "usps":
-        tracking_link = f"https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1={tracking_number}"
-        image = "data:image/png;base64,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"
-    # Return the data in your Package schema format
+    image = None
+    if carrier_name:
+        if carrier_name == "UPS":
+            tracking_link = (
+                f"https://www.ups.com/track?loc=en_US&tracknum={tracking_number}"
+            )
+            image = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/United_Parcel_Service_logo_2014.svg/640px-United_Parcel_Service_logo_2014.svg.png"
+        elif carrier_name == "FedEx":
+            tracking_link = f"https://www.fedex.com/fedextrack/?action=track&trackingnumber={tracking_number}"
+            image = "https://1000logos.net/wp-content/uploads/2021/04/Fedex-logo.png"
+        elif carrier_name == "USPS":
+            tracking_link = f"https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1={tracking_number}"
+            image = "data:image/png;base64,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"
+        # Return the data in your Package schema format
     package_data = {
         "_id": tracking_number,
         "company_name": sender,
@@ -247,15 +269,8 @@ def extract_package_data(message: dict):
         if tracking_link
         else "",  # You can extract this if needed
     }
-    if package_data["tracking_number"]:
-        return package_data
-    else:
-        raise Exception("No tracking number")
-
-
-def store_package_data(UserId: str, package_data: dict):
-    # Implement the logic to store the package data in your database
     return package_data
+
 
 
 def process_emails(message_ids, email, token):
@@ -270,47 +285,41 @@ def process_emails(message_ids, email, token):
     processed_packages = process_and_store_packages(email, classified_messages)
 
     running.remove(email)
-
     # check existing_email
     unique_email_identifier = itemsCollection.find_one({"_id": email})
+    if unique_email_identifier == None:
+        final_obj = {
+            "_id": email,
+            "items": processed_packages,
+            "last_modified": datetime.now(),
+        }
+        insertInfo = itemsCollection.insert_one(final_obj)
+    else:
+        pre_items = unique_email_identifier["items"]
+        joined_array = processed_packages + pre_items
+        # Create a set to store unique tracking numbers
+        unique_tracking_numbers = set()
 
-    pre_items = unique_email_identifier["items"]
+        # Create a list to store unique objects
+        result_array = []
 
-
-    joined_array = processed_packages + pre_items
-
-    # Create a set to store unique tracking numbers
-    unique_tracking_numbers = set()
-
-    # Create a list to store unique objects
-    result_array = []
-
-    # Iterate through the array
-    for obj in joined_array:
-    # Ensure the dictionary has the key "tracking_number"
-        if "tracking_number" in obj:
-            tracking_number = obj["tracking_number"]
-        # Check if the tracking number is not in the set (i.e., not encountered before)
-            if tracking_number not in unique_tracking_numbers:
-                unique_tracking_numbers.add(tracking_number)
-                result_array.append(obj)
-
-    # if unique_email_identifier == None:
-    #     final_obj = {
-    #         "_id": email,
-    #         "items": processed_packages,
-    #         "last_modified": datetime.now(),
-    #     }
-    #     insertInfo = itemsCollection.insert_one(final_obj)
-    # else:
-    # avoid duplicate message Ids
-    updateInfo = itemsCollection.update_one(
-            {"_id": email},
-            {
-                "$set": {"last_modified": datetime.now(), "items": result_array},
-            },
-        )
-    return processed_packages
+        # Iterate through the array
+        for obj in joined_array:
+        # Ensure the dictionary has the key "tracking_number"
+            if "tracking_number" in obj:
+                tracking_number = obj["tracking_number"]
+            # Check if the tracking number is not in the set (i.e., not encountered before)
+                if tracking_number not in unique_tracking_numbers:
+                    unique_tracking_numbers.add(tracking_number)
+                    result_array.append(obj)
+        updateInfo = itemsCollection.update_one(
+                {"_id": email},
+                {
+                    "$set": {"last_modified": datetime.now(), "items": result_array},
+                },
+            )
+        
+    return
 
 
 @app.get("/fetch-gmail-data")
