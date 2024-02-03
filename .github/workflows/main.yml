@@ -24,9 +24,6 @@ jobs:
       - name: Build the Next.js app
         run: npm run build
 
-      - name: List contents of 'out'
-        run: ls -R out
-
       - name: Set up Firebase CLI
         run: |
           npm install -g firebase-tools

@@ -94,7 +94,7 @@ const LoginPage = (props: Props) => {
 
   return (
     <div>
-      <h2>Login is required to user our services</h2>
+      <h2>Login is required to use our services</h2>
       <Container>
         Login with Google
         {/* <h2>Login</h2>
