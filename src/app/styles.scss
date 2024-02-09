@@ -50,3 +50,16 @@ main {
     }
   }
 }
+
+@media only screen and (max-width: 800px) {
+  main {
+    .home {
+      p {
+        display: none;
+      }
+      .active {
+        display: block;
+      }
+    }
+  }
+}

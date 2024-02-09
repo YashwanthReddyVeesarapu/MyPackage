@@ -1,10 +1,10 @@
 "use client";
-import { useContext, createContext, useState, useEffect } from "react";
+import { useContext, createContext, useState } from "react";
 
 const AuthContext = createContext("auth");
 
 import { auth } from "@/lib/firebase/config";
-import { GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);

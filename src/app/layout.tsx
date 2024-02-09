@@ -4,20 +4,12 @@ import { Inter, Montserrat } from "next/font/google";
 
 import { AuthContextProvider } from "../components/context/AuthContext";
 
-// const inter = Inter({ subsets: ["latin"] });
-
-const montserrat = Montserrat({
-  weight: ["400", "700"],
-  style: ["normal", "italic"],
-  subsets: ["latin"],
-  display: "swap",
-});
+const inter = Inter({ subsets: ["latin"] });
 
 import { store } from "@/redux/store";
 
 import MainLayout from "@/layouts/MainLayout";
-import { ThemeProvider } from "@emotion/react";
-import { createTheme } from "@mui/material";
+
 import { Provider } from "react-redux";
 import Head from "next/head";
 
@@ -31,12 +23,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const theme = createTheme({
-    typography: {
-      fontFamily: montserrat.style.fontFamily,
-    },
-  });
-
   return (
     <html lang="en">
       <Head>
@@ -57,15 +43,13 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
         <title>MyPackage</title>
       </Head>
-      <ThemeProvider theme={theme}>
-        <body className={montserrat.className}>
-          <Provider store={store}>
-            <AuthContextProvider>
-              <MainLayout>{children}</MainLayout>
-            </AuthContextProvider>
-          </Provider>
-        </body>
-      </ThemeProvider>
+      <body>
+        <Provider store={store}>
+          <AuthContextProvider>
+            <MainLayout>{children}</MainLayout>
+          </AuthContextProvider>
+        </Provider>
+      </body>
     </html>
   );
 }

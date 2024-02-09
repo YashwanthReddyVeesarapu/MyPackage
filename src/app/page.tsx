@@ -1,19 +1,12 @@
 "use client";
-import MainLayout from "@/layouts/MainLayout";
 import "./styles.scss";
-import Input from "@/components/Input";
 import { useEffect, useState } from "react";
-import Container from "@/components/Container";
 
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Box,
-  Button,
-  Card,
   CardContent,
-  CardMedia,
   IconButton,
   Step,
   StepIconProps,
@@ -22,7 +15,6 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-  ImageList,
   CircularProgress,
 } from "@mui/material";
 import {
@@ -38,12 +30,29 @@ import StepConnector, {
 } from "@mui/material/StepConnector";
 import { styled } from "@mui/material/styles";
 import Image from "next/image";
-import { apiInstance } from "@/lib/api/apiInstance";
 import { UserAuth } from "@/components/context/AuthContext";
 import { redirect } from "next/navigation";
-import { GoogleAuthProvider, getAuth } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchData } from "@/redux/actions/actions";
+import Header from "@/components/Header";
+
+type Item = {
+  _id: string;
+  status: any;
+  last_modified: string;
+  company_name: string;
+  image: string;
+  last_location: string;
+  tracking_number: string;
+  carrier: string;
+  tracking_link: string;
+};
+
+type State = {
+  data: any;
+  user: any;
+};
 
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -110,11 +119,13 @@ function QontoStepIcon(props: StepIconProps) {
 export default function Home() {
   const [trackingNumber, setTrackingNumber] = useState("");
   const [value, setValue] = useState("All");
-  const [filteredData, setFilteredData] = useState<Array<any>>([]);
+  const [filteredData, setFilteredData] = useState<Array<Item>>([]);
 
   const [itemsData, setItemsData] = useState([]);
 
-  const state = useSelector((state: any) => state);
+  const state = useSelector((state: State) => state);
+
+  console.log(state);
 
   const auth = getAuth();
 
@@ -130,18 +141,6 @@ export default function Home() {
     "Out for delivery",
     "Delivered",
   ];
-
-  type Item = {
-    _id: string;
-    status: any;
-    last_modified: string;
-    company_name: string;
-    image: string;
-    last_location: string;
-    tracking_number: string;
-    carrier: string;
-    tracking_link: string;
-  };
 
   const filterOptions = [
     { value: "All", name: "All" },
@@ -268,7 +267,6 @@ export default function Home() {
               <CardContent
                 sx={{
                   flex: "1",
-                  width: "100%",
                   display: "flex",
                   flexDirection: "column",
                   textAlign: "center",
@@ -291,7 +289,11 @@ export default function Home() {
                 >
                   {steps.map((label) => (
                     <Step key={label}>
-                      <Typography>{label}</Typography>
+                      <Typography
+                        className={item.status == label ? "active" : ""}
+                      >
+                        {label}
+                      </Typography>
                       <StepLabel StepIconComponent={QontoStepIcon}></StepLabel>
                     </Step>
                   ))}
